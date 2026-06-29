@@ -90,6 +90,10 @@ vanishes on it. -/
 def IsIsotropic (ω : SymplecticForm V) (L : Submodule ℝ V) : Prop :=
   L ≤ ω.orthogonal L
 
+/-- Isotropy is containment in the symplectic complement. -/
+lemma isIsotropic_iff_le_orthogonal : ω.IsIsotropic L ↔ L ≤ ω.orthogonal L :=
+  Iff.rfl
+
 /-- A submodule is coisotropic if it contains its symplectic complement. -/
 def IsCoisotropic (ω : SymplecticForm V) (L : Submodule ℝ V) : Prop :=
   ω.orthogonal L ≤ L

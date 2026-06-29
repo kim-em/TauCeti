@@ -39,9 +39,11 @@ of `ω` changes the metric scale but not the compatible almost complex structure
 
 public section
 
-namespace TauCeti
+namespace LinearMap.BilinForm
 
-private lemma bilinearForm_orthogonal_smul {R : Type*} {M : Type*}
+/-- A nonzero scalar multiple of a bilinear form has the same orthogonal complement. -/
+@[simp]
+lemma orthogonal_smul {R : Type*} {M : Type*}
     [CommSemiring R] [NoZeroDivisors R] [AddCommMonoid M] [Module R M]
     (B : _root_.LinearMap.BilinForm R M) {L : Submodule R M} {c : R} (hc : c ≠ 0) :
     (c • B).orthogonal L = B.orthogonal L := by
@@ -54,6 +56,10 @@ private lemma bilinearForm_orthogonal_smul {R : Type*} {M : Type*}
     exact (mul_eq_zero.mp hyx).resolve_left hc
   · intro h y hy
     simp [h y hy]
+
+end LinearMap.BilinForm
+
+namespace TauCeti
 
 namespace SymplecticForm
 
@@ -115,19 +121,13 @@ variable {L : Submodule ℝ V}
 lemma orthogonal_rescale (c : ℝ) (hc : c ≠ 0) :
     (ω.rescale c hc).orthogonal L = ω.orthogonal L := by
   rw [orthogonal_def, orthogonal_def, rescale_toBilinForm,
-    bilinearForm_orthogonal_smul ω.toBilinForm hc]
+    _root_.LinearMap.BilinForm.orthogonal_smul ω.toBilinForm hc]
 
 /-- Nonzero rescaling preserves and reflects isotropic subspaces. -/
 @[simp]
 lemma isIsotropic_rescale_iff (c : ℝ) (hc : c ≠ 0) :
     (ω.rescale c hc).IsIsotropic L ↔ ω.IsIsotropic L := by
-  rw [isIsotropic_iff, isIsotropic_iff]
-  constructor
-  · intro h v hv w hw
-    have hvw := h v hv w hw
-    simpa only [rescale_apply] using (mul_eq_zero.mp hvw).resolve_left hc
-  · intro h v hv w hw
-    simp [h v hv w hw]
+  rw [isIsotropic_iff_le_orthogonal, isIsotropic_iff_le_orthogonal, orthogonal_rescale c hc]
 
 /-- Isotropy is preserved by nonzero rescaling of the symplectic form. -/
 lemma IsIsotropic.rescale (h : ω.IsIsotropic L) (c : ℝ) (hc : c ≠ 0) :
