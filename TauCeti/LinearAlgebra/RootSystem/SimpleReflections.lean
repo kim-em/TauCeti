@@ -58,9 +58,7 @@ private lemma ofIdx_reflectionPerm_self_eq (i : ι) :
   rw [RootPairing.ofIdx_reflectionPerm P i i]
   have hsquare :
       RootPairing.weylGroup.ofIdx P i * RootPairing.weylGroup.ofIdx P i = 1 := by
-    rw [mul_eq_one_iff_eq_inv]
-    apply Subtype.ext
-    exact (RootPairing.Equiv.reflection_inv P i).symm
+    rw [mul_eq_one_iff_eq_inv, RootPairing.ofIdx_inv]
   rw [hsquare, one_mul]
 
 /-! ## Words in the simple reflections -/
