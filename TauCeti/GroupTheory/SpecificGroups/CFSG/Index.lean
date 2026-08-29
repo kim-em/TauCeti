@@ -481,6 +481,17 @@ theorem fieldExponent_pos (d : LieTypeIndex) : 0 < d.fieldExponent := by
     simp only [fieldExponent] <;>
     first | exact PrimePower.exponent_pos _ | positivity
 
+namespace UsesHalfFrobenius
+
+/-- A half-Frobenius index has odd field exponent. It is `2 * m + 1` on the three uniform
+families and `1` on the Tits branch. -/
+theorem odd_fieldExponent {d : LieTypeIndex} (h : d.UsesHalfFrobenius) : Odd d.fieldExponent := by
+  cases d <;> try simp at h
+  all_goals simp [LieTypeIndex.fieldExponent_suzuki, LieTypeIndex.fieldExponent_reeG2,
+    LieTypeIndex.fieldExponent_reeF4, LieTypeIndex.fieldExponent_tits]
+
+end UsesHalfFrobenius
+
 end LieTypeIndex
 
 /-- A Lie-type index satisfying its rank, field, and preferred-representative conditions. Later
@@ -541,19 +552,6 @@ theorem fieldExponent_pos (d : ValidLieTypeIndex) : 0 < d.fieldExponent :=
   d.1.fieldExponent_pos
 
 end ValidLieTypeIndex
-
-namespace SuzukiReeIndex
-
-/-- The field exponent of a Suzuki--Ree index is odd. It is `2 * m + 1` on the three uniform
-families and `1` on the Tits branch. -/
-theorem odd_fieldExponent (e : SuzukiReeIndex) : Odd e.1.fieldExponent := by
-  obtain ⟨⟨d, hvalid⟩, hhalf⟩ := e
-  cases d <;> try simp at hhalf
-  all_goals simp [ValidLieTypeIndex.fieldExponent, LieTypeIndex.fieldExponent_suzuki,
-    LieTypeIndex.fieldExponent_reeG2, LieTypeIndex.fieldExponent_reeF4,
-    LieTypeIndex.fieldExponent_tits]
-
-end SuzukiReeIndex
 
 /-! ## Executable checks for the range conventions -/
 

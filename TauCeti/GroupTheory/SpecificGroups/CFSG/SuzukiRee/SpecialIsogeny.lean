@@ -11,7 +11,7 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.Assembly
 public import TauCeti.LinearAlgebra.RootSystem.SpecialNodePermutations
 
 /-!
-# The special isogeny selected by a Suzuki--Ree index
+# The root-datum special isogeny selected by a Suzuki--Ree index
 
 The Steinberg endomorphism of a Suzuki or Ree group is an odd power of the exceptional isogeny of
 its pinned ambient group. That isogeny exists only for `B₂` and `F₄` in characteristic two and for

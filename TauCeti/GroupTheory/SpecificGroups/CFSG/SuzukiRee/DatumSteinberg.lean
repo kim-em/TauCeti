@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.GroupTheory.SpecificGroups.CFSG.SpecialIsogeny
+public import TauCeti.GroupTheory.SpecificGroups.CFSG.SuzukiRee.SpecialIsogeny
 
 /-!
 # Root-datum Steinberg maps for the Suzuki--Ree families
@@ -116,7 +116,7 @@ isogeny itself. -/
 @[simp] theorem datumSteinberg_indexEquiv :
     e.datumSteinberg.indexEquiv = e.datumSpecialIsogeny.indexEquiv := by
   simpa only [datumSteinberg,
-    Nat.two_mul_div_two_add_one_of_odd e.odd_fieldExponent] using
+    Nat.two_mul_div_two_add_one_of_odd e.2.odd_fieldExponent] using
       RootPairingIsogeny.indexEquiv_pow_two_mul_add_one
         (e.1.dynkinType.simplyConnectedRootDatum e.1.dynkinType_valid)
         e.datumSpecialIsogeny_mul_self (e.1.fieldExponent / 2)
@@ -137,9 +137,10 @@ to the selected special isogeny. -/
         (e.1.dynkinType.simpleIndex e.1.dynkinType_valid i) =
       e.1.dynkinType.rootLength i *
         (e.1.characteristic : ℤ) ^ (e.1.fieldExponent / 2) := by
+  have hodd : Odd e.1.fieldExponent := e.2.odd_fieldExponent
   rw [datumSteinberg]
   conv_lhs =>
-    rw [← Nat.two_mul_div_two_add_one_of_odd e.odd_fieldExponent]
+    rw [← Nat.two_mul_div_two_add_one_of_odd hodd]
   rw [RootPairingIsogeny.exponent_pow_two_mul_add_one _ e.datumSpecialIsogeny_mul_self,
     datumSpecialIsogeny_exponent_simpleIndex]
   norm_cast
@@ -191,12 +192,12 @@ theorem datumSteinberg_coweightMap_coroot_simpleIndex (i : Fin e.1.rank) :
 
 /-- **The square of the Suzuki--Ree root-datum Steinberg map is the field-order Frobenius
 scaling.** This is `steinberg(m) ^ 2 = Frob_(p ^ (2 * m + 1))`, including the Tits value `m = 0`.
-The existing `ValidLieTypeIndex.fieldOrder_eq_characteristic_pow` identifies the
-positive-natural scalar on the right with `e.1.fieldOrder`. -/
+The scalar is exposed through the canonical field-order parameter. -/
 @[simp] theorem datumSteinberg_comp_self :
     e.datumSteinberg.comp e.datumSteinberg =
-      RootPairingIsogeny.smulId _
-        (⟨e.1.characteristic, e.1.characteristic_prime.pos⟩ ^ e.1.fieldExponent) := by
+      RootPairingIsogeny.smulId _ ⟨e.1.fieldOrder, by
+        rw [e.1.fieldOrder_eq_characteristic_pow]
+        exact pow_pos e.1.characteristic_prime.pos _⟩ := by
   calc
     e.datumSteinberg.comp e.datumSteinberg = e.datumSteinberg * e.datumSteinberg :=
       (RootPairingIsogeny.mul_def _ _).symm
@@ -206,6 +207,12 @@ positive-natural scalar on the right with `e.1.fieldOrder`. -/
       exact RootPairingIsogeny.pow_mul_self_eq_smulId
         (e.1.dynkinType.simplyConnectedRootDatum e.1.dynkinType_valid)
         e.datumSpecialIsogeny_mul_self e.1.fieldExponent
+    _ = RootPairingIsogeny.smulId _ ⟨e.1.fieldOrder, by
+        rw [e.1.fieldOrder_eq_characteristic_pow]
+        exact pow_pos e.1.characteristic_prime.pos _⟩ := by
+      congr 1
+      apply PNat.coe_injective
+      exact e.1.fieldOrder_eq_characteristic_pow.symm
 
 end
 
