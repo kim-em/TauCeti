@@ -39,8 +39,8 @@ on the Bourbaki-numbered root subgroups of the carrier, with the parameter untou
 is milestone L1's `γ (x_α(t)) = x_{γ α}(t)` on the simple root subgroups, and its composite with
 the Frobenius; nothing is claimed about a non-simple root, where the corresponding equation carries
 the signs `ε_α = ±1` the roadmap warns of. The other two relations L1 requires are the order
-relation `TauCeti.GraphTwistedIndex.geckGraphAut_pow_twistOrder`, which is `γ ^ 2 = 1` on `²Aₙ`,
-`²Dₙ` and `²E₆` and `γ ^ 3 = 1` on `³D₄`, and the commutation of `γ` with `Frob_q`,
+relation `TauCeti.GraphTwistedIndex.geckGraphAut_pow_twistOrder_eq_one`, which is `γ ^ 2 = 1` on
+`²Aₙ`, `²Dₙ` and `²E₆` and `γ ^ 3 = 1` on `³D₄`, and the commutation of `γ` with `Frob_q`,
 `TauCeti.GraphTwistedIndex.geckGraphAut_comp_geckFrobenius`, which is what lets the composite be
 taken in either order and what makes its twist-order iterate the Frobenius `Frob_(q ^ e)` of the
 larger field, `TauCeti.GraphTwistedIndex.geckSteinberg_iterate_twistOrder_eq_geckFrobenius`.
@@ -79,7 +79,8 @@ the `geck` prefix exists to prevent.
 * `TauCeti.GraphTwistedIndex.geckGraphAut_geckRootSubgroup` and
   `TauCeti.GraphTwistedIndex.geckSteinberg_geckRootSubgroup`: the pinning equations on the numbered
   root subgroups.
-* `TauCeti.GraphTwistedIndex.geckGraphAut_pow_twistOrder`: the order relation of the graph factor.
+* `TauCeti.GraphTwistedIndex.geckGraphAut_pow_twistOrder_eq_one`: the order relation of the graph
+  factor.
 * `TauCeti.GraphTwistedIndex.geckGraphAut_comp_geckFrobenius` and
   `TauCeti.GraphTwistedIndex.geckSteinberg_eq_geckFrobenius_comp`: the two factors commute, so the
   composite may be taken in either order.
@@ -159,7 +160,7 @@ theorem geckGraphAut_geckRootSubgroup (i : Fin d.1.dynkinType.rank ⊕ Fin d.1.d
 `²E₆`, `γ ^ 3 = 1` for `³D₄`, and the trivial relation on an untwisted family, all read off the
 twist order recorded by the index. -/
 @[simp]
-theorem geckGraphAut_pow_twistOrder : d.geckGraphAut ^ d.twistOrder = 1 := by
+theorem geckGraphAut_pow_twistOrder_eq_one : d.geckGraphAut ^ d.twistOrder = 1 := by
   rw [geckGraphAut_def]
   exact DynkinType.geckGraphAutPoints_pow_eq_one d.1.dynkinType_valid
     d.diagramPerm_mem_diagramSymmetry d.1.Closure d.diagramPerm_pow_twistOrder
@@ -265,7 +266,8 @@ theorem geckSteinberg_iterate_twistOrder_eq_geckFrobenius :
       ⇑(d.1.dynkinType.geckFrobenius d.1.dynkinType_valid d.1.characteristic
         (d.twistOrder * d.1.fieldExponent) d.1.Closure) :=
   funext fun g => by
-    rw [d.geckSteinberg_iterate d.twistOrder g, d.geckGraphAut_pow_twistOrder, MulAut.one_apply]
+    rw [d.geckSteinberg_iterate d.twistOrder g, d.geckGraphAut_pow_twistOrder_eq_one,
+      MulAut.one_apply]
 
 /-- **Entrywise, iterating the Steinberg map to the twist order raises every matrix entry to the
 `q ^ e`-th power**, for `e` the twist order. It is the reading of
