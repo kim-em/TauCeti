@@ -6,7 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
-public import Mathlib.FieldTheory.Minpoly.IsConjRoot
+public import Mathlib.FieldTheory.Normal.Defs
+import Mathlib.FieldTheory.Minpoly.IsConjRoot
 import Mathlib.NumberTheory.Cyclotomic.PrimitiveRoots
 
 /-!

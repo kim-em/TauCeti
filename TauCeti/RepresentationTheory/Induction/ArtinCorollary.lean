@@ -27,17 +27,14 @@ determination over `ℚ` then gives the representation isomorphism.
 
 ## Main result
 
-* `TauCeti.rat_rep_iso_of_res_cyclic`: two rational representations with equal character sums on
-  every cyclic subgroup are isomorphic.
+* `TauCeti.nonempty_iso_of_subgroupCharacterSum_eq_cyclic`: two rational representations with
+  equal character sums on every cyclic subgroup are isomorphic.
 * `TauCeti.subgroupCharacterSum`: the character sum over a finite subgroup, with the finite
   structure chosen canonically up to proof irrelevance.
-* `TauCeti.rat_rep_iso_of_finrank_invariants_cyclic`: the equivalent fixed-space-dimension
+* `TauCeti.nonempty_iso_of_finrank_invariants_eq_cyclic`: the equivalent fixed-space-dimension
   formulation.
 
 ## References
-
-This is the "Artin's corollary (rational representations)" target in Layer 6 of
-`TauCetiRoadmap/RepresentationTheory/InductionRestriction/README.md`.
 
 See J.-P. Serre, *Linear Representations of Finite Groups*, Part II, §9.2.
 -/
@@ -52,14 +49,15 @@ universe u
 
 /-- The sum of a finite-group character over a subgroup. -/
 noncomputable def subgroupCharacterSum {k : Type*} {G : Type u} [Field k] [Group G]
-    [Fintype G] (X : FDRep k G) (C : Subgroup G) : k := by
+    (X : FDRep k G) (C : Subgroup G) [Finite C] : k := by
   let _ : Fintype C := Fintype.ofFinite C
   exact ∑ c : C, X.character (c : G)
 
 /-- The subgroup character sum is the sum over any supplied `Fintype` structure on the
 subgroup. -/
+@[simp]
 theorem subgroupCharacterSum_eq_sum {k : Type*} {G : Type u} [Field k] [Group G]
-    [Fintype G] (X : FDRep k G) (C : Subgroup G) [Fintype C] :
+    (X : FDRep k G) (C : Subgroup G) [Fintype C] :
     subgroupCharacterSum X C = ∑ c : C, X.character (c : G) := by
   classical
   unfold subgroupCharacterSum
@@ -72,8 +70,8 @@ theorem subgroupCharacterSum_eq_sum {k : Type*} {G : Type u} [Field k] [Group G]
 /-- The character sum over `C` is `|C|` times the dimension of the fixed space of the restricted
 representation. -/
 theorem subgroupCharacterSum_eq_card_mul_finrank_invariants
-    {k : Type*} {G : Type u} [Field k] [CharZero k] [Group G] [Fintype G]
-    (X : FDRep k G) (C : Subgroup G) :
+    {k : Type*} {G : Type u} [Field k] [CharZero k] [Group G]
+    (X : FDRep k G) (C : Subgroup G) [Finite C] :
     subgroupCharacterSum X C =
       (Nat.card C : k) * Module.finrank k (_root_.Representation.invariants (resFDRep C X).ρ) := by
   classical
@@ -90,31 +88,12 @@ theorem subgroupCharacterSum_eq_card_mul_finrank_invariants
     _ = (Nat.card C : k) *
         Module.finrank k (_root_.Representation.invariants (resFDRep C X).ρ) := by rw [hav]
 
-private noncomputable instance subgroupFintype {G : Type u} [Group G] [Fintype G]
-    (C : Subgroup G) : Fintype C := Fintype.ofFinite C
-
-/-- A rational character has the same value on two elements that generate the same cyclic
-subgroup. -/
-private theorem character_eq_of_zpowers_eq {G : Type u} [Group G] [Finite G]
-    (X : FDRep ℚ G) {g x : G} (h : Subgroup.zpowers x = Subgroup.zpowers g) :
-    X.character x = X.character g := by
-  have hx : x ∈ Submonoid.powers g :=
-    mem_powers_iff_mem_zpowers.mpr <| h.le (Subgroup.mem_zpowers x)
-  obtain ⟨j, rfl⟩ := hx
-  have hord : orderOf (g ^ j) = orderOf g := by
-    rw [← Nat.card_zpowers, h, Nat.card_zpowers]
-  have hcop : (orderOf g).Coprime j := by
-    rw [orderOf_pow] at hord
-    exact Nat.coprime_iff_gcd_eq_one.mpr <|
-      (Nat.div_eq_self.mp hord).resolve_left (orderOf_pos g).ne'
-  let _ : NeZero (orderOf g) := ⟨(orderOf_pos g).ne'⟩
-  exact X.character_pow_eq_character_of_coprime (pow_orderOf_eq_one g) hcop
-
 /-- **Artin's fixed-point corollary.** A rational representation of a finite group is determined
 by the sums of its character over the cyclic subgroups. Equivalently, since the sum over `C` is
 `|C|` times the dimension of the `C`-fixed space, it is determined by those fixed-space
 dimensions. -/
-theorem rat_rep_iso_of_res_cyclic {G : Type u} [Group G] [Fintype G] (V W : FDRep ℚ G)
+theorem nonempty_iso_of_subgroupCharacterSum_eq_cyclic {G : Type u} [Group G] [Finite G]
+    (V W : FDRep ℚ G)
     (h : ∀ C : Subgroup G, IsCyclic C →
       subgroupCharacterSum V C = subgroupCharacterSum W C) :
     Nonempty (V ≅ W) := by
@@ -127,11 +106,13 @@ theorem rat_rep_iso_of_res_cyclic {G : Type u} [Group G] [Fintype G] (V W : FDRe
     | h n ih =>
       intro x hx
       let C := Subgroup.zpowers x
+      let _ : Fintype C := Fintype.ofFinite C
+      let _ : IsCyclic C := inferInstance
       let generators : Finset C := Finset.univ.filter fun c ↦ orderOf (c : G) = n
       have hsum : ∑ c : C, (V.character (c : G) - W.character (c : G)) = 0 := by
         rw [Finset.sum_sub_distrib, ← subgroupCharacterSum_eq_sum,
           ← subgroupCharacterSum_eq_sum,
-          h C (by change IsCyclic (Subgroup.zpowers x); infer_instance), sub_self]
+          h C inferInstance, sub_self]
       have hterm (c : C) : V.character (c : G) - W.character (c : G) =
           if orderOf (c : G) = n then V.character x - W.character x else 0 := by
         split_ifs with hc
@@ -139,8 +120,8 @@ theorem rat_rep_iso_of_res_cyclic {G : Type u} [Group G] [Fintype G] (V W : FDRe
             have heq := Subgroup.eq_of_le_of_card_ge (Subgroup.zpowers_le.mpr c.property) (by
               rw [Nat.card_zpowers, Nat.card_zpowers, hc, hx])
             simpa [C] using heq
-          rw [character_eq_of_zpowers_eq V hzpowers,
-            character_eq_of_zpowers_eq W hzpowers]
+          rw [V.character_eq_of_zpowers_eq hzpowers,
+            W.character_eq_of_zpowers_eq hzpowers]
         · have hlt : orderOf (c : G) < n := by
             apply lt_of_le_of_ne
             · rw [← hx]
@@ -168,14 +149,13 @@ theorem rat_rep_iso_of_res_cyclic {G : Type u} [Group G] [Fintype G] (V W : FDRe
 
 /-- **Artin's fixed-point corollary, in invariant-space form.** Two rational representations are
 isomorphic when the dimensions of their fixed spaces agree on every cyclic subgroup. -/
-theorem rat_rep_iso_of_finrank_invariants_cyclic {G : Type u} [Group G] [Finite G]
+theorem nonempty_iso_of_finrank_invariants_eq_cyclic {G : Type u} [Group G] [Finite G]
     (V W : FDRep ℚ G)
     (h : ∀ C : Subgroup G, IsCyclic C →
       Module.finrank ℚ (_root_.Representation.invariants (resFDRep C V).ρ) =
         Module.finrank ℚ (_root_.Representation.invariants (resFDRep C W).ρ)) :
     Nonempty (V ≅ W) := by
-  let _ : Fintype G := Fintype.ofFinite G
-  apply rat_rep_iso_of_res_cyclic V W
+  apply nonempty_iso_of_subgroupCharacterSum_eq_cyclic V W
   intro C hC
   rw [subgroupCharacterSum_eq_card_mul_finrank_invariants,
     subgroupCharacterSum_eq_card_mul_finrank_invariants, h C hC]

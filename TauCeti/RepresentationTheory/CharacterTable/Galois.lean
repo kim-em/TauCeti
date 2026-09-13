@@ -62,6 +62,8 @@ consumes once such a `σ` is in hand.
   by the power maps that automorphisms of `ℂ` realize.
 * `FDRep.character_pow_eq_character_of_coprime`: a rational representation has equal character
   values on coprime powers.
+* `FDRep.character_eq_of_zpowers_eq`: a rational character has the same value on elements that
+  generate the same cyclic subgroup.
 
 ## References
 
@@ -188,6 +190,23 @@ theorem _root_.FDRep.character_pow_eq_character_of_coprime (X : FDRep ℚ G) {g 
   apply (algebraMap ℚ K).injective
   rw [← hY, ← hY, ← hmap, hY]
   exact σ.commutes (X.character g)
+
+/-- A rational character has the same value on two elements that generate the same cyclic
+subgroup. -/
+theorem _root_.FDRep.character_eq_of_zpowers_eq {G : Type u} [Group G] [Finite G]
+    (X : FDRep ℚ G) {g x : G} (h : Subgroup.zpowers x = Subgroup.zpowers g) :
+    X.character x = X.character g := by
+  have hx : x ∈ Submonoid.powers g :=
+    mem_powers_iff_mem_zpowers.mpr <| h.le (Subgroup.mem_zpowers x)
+  obtain ⟨j, rfl⟩ := hx
+  have hord : orderOf (g ^ j) = orderOf g := by
+    rw [← Nat.card_zpowers, h, Nat.card_zpowers]
+  have hcop : (orderOf g).Coprime j := by
+    rw [orderOf_pow] at hord
+    exact Nat.coprime_iff_gcd_eq_one.mpr <|
+      (Nat.div_eq_self.mp hord).resolve_left (orderOf_pos g).ne'
+  let _ : NeZero (orderOf g) := ⟨(orderOf_pos g).ne'⟩
+  exact X.character_pow_eq_character_of_coprime (pow_orderOf_eq_one g) hcop
 
 end FDRep
 
