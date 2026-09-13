@@ -465,12 +465,9 @@ theorem toLinearMap_simplyConnectedRootDatum (t : DynkinType) (ht : t.Valid)
 /-- Evaluation at the `i`-th simple coroot extracts the `i`-th fundamental-weight coordinate. -/
 @[simp] theorem coroot'_simpleIndex_apply (t : DynkinType) (ht : t.Valid)
     (i : Fin t.rank) (mu : Fin t.rank → ℤ) :
-    (t.simplyConnectedRootDatum ht).coroot' (t.simpleIndex ht i) mu = mu i := by
-  -- `coroot'` reduces through the coercion of a root pairing to two nested linear maps.
-  change (t.simplyConnectedRootDatum ht).toLinearMap mu
-    ((t.simplyConnectedRootDatum ht).coroot (t.simpleIndex ht i)) = mu i
+    (t.simplyConnectedRootDatum ht).toLinearMap mu (Pi.single i 1) = mu i := by
   rw [t.toLinearMap_simplyConnectedRootDatum ht,
-    t.coroot_simpleIndex ht i, dotProduct_single, mul_one]
+    dotProduct_single, mul_one]
 
 /-- **The Cartan integers of the pinned datum at the simple indices are the entries of its
 Bourbaki-numbered Cartan matrix.** The simple root is a row of the Cartan matrix and the simple

@@ -106,10 +106,15 @@ theorem torusCharacter_geckSimpleReflectionTorusPoint (i : Fin t.rank)
       TauCeti.torusCharacter s
         (RootPairing.weylGroup.ofIdx (t.simplyConnectedRootDatum ht)
           (t.simpleIndex ht i) • mu) := by
+  have hcoroot :
+      (t.simplyConnectedRootDatum ht).coroot' (t.simpleIndex ht i) mu = mu i := by
+    change (t.simplyConnectedRootDatum ht).toLinearMap mu
+      ((t.simplyConnectedRootDatum ht).coroot (t.simpleIndex ht i)) = mu i
+    rw [t.coroot_simpleIndex ht, t.coroot'_simpleIndex_apply ht]
   rw [t.geckSimpleReflectionTorusPoint_def ht,
     TauCeti.torusCharacter_weylReflectTorusPoint,
     RootPairing.weylGroup.ofIdx_smul, RootPairing.Equiv.reflection_smul,
-    RootPairing.reflection_apply, t.coroot'_simpleIndex_apply ht]
+    RootPairing.reflection_apply, hcoroot]
 
 /-- **The character formula for a Geck Weyl word.** If the word spells `w`, its action on torus
 points is dual to the action of `w⁻¹` on the character lattice. -/
@@ -218,10 +223,14 @@ theorem geckWeylTorusAction_apply_eq_word {w : (t.simplyConnectedRootDatum ht).w
 /-- The abstract action of a simple reflection is the pinned simple reflection on torus points. -/
 @[simp]
 theorem geckWeylTorusAction_ofIdx (i : Fin t.rank) (A : Type v) [CommRing A] :
-    (t.geckWeylTorusAction ht A
+    ↑(t.geckWeylTorusAction ht A
         (RootPairing.weylGroup.ofIdx (t.simplyConnectedRootDatum ht)
-          (t.simpleIndex ht i))).toMonoidHom =
+          (t.simpleIndex ht i))) =
       t.geckSimpleReflectionTorusPoint ht i A := by
+  change (t.geckWeylTorusAction ht A
+      (RootPairing.weylGroup.ofIdx (t.simplyConnectedRootDatum ht)
+        (t.simpleIndex ht i))).toMonoidHom =
+    t.geckSimpleReflectionTorusPoint ht i A
   rw [t.geckWeylTorusAction_eq_word ht (l := [i]) (by simp),
     geckWeylWordTorusAction_cons, geckWeylWordTorusAction_nil]
   exact MonoidHom.comp_id _
