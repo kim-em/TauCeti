@@ -23,7 +23,7 @@ public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.ScalarUnipotent
 -- Non-public: the order of `GL (Fin 2) F` over a finite field is used only inside the counting
 -- proofs, so downstream importers do not pay for it.
 import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Card
-import TauCeti.GroupTheory.Index
+import TauCeti.GroupTheory.Index.Basic
 
 /-!
 # Centralizers of the regular elements of `GL₂`

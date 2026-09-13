@@ -18,7 +18,7 @@ public import TauCeti.RingTheory.Norm.Units
 -- `Algebra.norm_ne_zero_iff`, `Module.natCard_eq_pow_finrank` and `Nat.card_units` are used only
 -- inside proofs, so downstream importers do not pay for them.
 import TauCeti.LinearAlgebra.Dimension.IsQuadraticExtension
-import TauCeti.GroupTheory.Index
+import TauCeti.GroupTheory.Index.Basic
 -- Non-public: conjugation invariance of the shifted determinant is used only inside a proof.
 import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Conjugation
 -- Non-public: the order of `GL (Fin 2) F` over a finite field is used only inside the proof of
