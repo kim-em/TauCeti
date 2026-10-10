@@ -40,11 +40,11 @@ variable (d : ClassData G) {R : Type*} [CommSemiring R]
 
 /-- The weighted Hermitian norm of a numbered row, with all class-size denominators cleared
 by their product. The coefficient of coordinate `k` is the product of the other class sizes. -/
-def clearedClassRowNorm (conj : R →+* R) (row : Fin d.numClasses → R) : R :=
+def clearedClassRowNorm (conj : R → R) (row : Fin d.numClasses → R) : R :=
   ∑ k, (∏ j ∈ Finset.univ.erase k, (d.classFinset j).card : ℕ) * row k * conj (row k)
 
 /-- The defining sum for the denominator-cleared class-row norm. -/
-theorem clearedClassRowNorm_def (conj : R →+* R) (row : Fin d.numClasses → R) :
+theorem clearedClassRowNorm_def (conj : R → R) (row : Fin d.numClasses → R) :
     d.clearedClassRowNorm conj row =
       ∑ k, (∏ j ∈ Finset.univ.erase k, (d.classFinset j).card : ℕ) * row k * conj (row k) :=
   (rfl)
@@ -52,7 +52,7 @@ theorem clearedClassRowNorm_def (conj : R →+* R) (row : Fin d.numClasses → R
 /-- Recover a positive character degree from an exact central-character row. Each positive
 divisor of the group order is tested against the denominator-cleared degree-square equation.
 An arbitrary row may have no such degree. -/
-def recoverCharacterDegree? [DecidableEq R] (conj : R →+* R)
+def recoverCharacterDegree? [DecidableEq R] (conj : R → R)
     (row : Fin d.numClasses → R) : Option ℕ :=
   let norm := d.clearedClassRowNorm conj row
   let target : R := (Fintype.card G : R) * (∏ j, (d.classFinset j).card : ℕ)
@@ -61,7 +61,7 @@ def recoverCharacterDegree? [DecidableEq R] (conj : R →+* R)
 
 /-- A recovered degree is positive, divides the group order, and satisfies the
 denominator-cleared degree-square equation. No uniqueness assumption is needed. -/
-theorem recoverCharacterDegree?_sound [DecidableEq R] (conj : R →+* R)
+theorem recoverCharacterDegree?_sound [DecidableEq R] (conj : R → R)
     (row : Fin d.numClasses → R) {n : ℕ}
     (h : d.recoverCharacterDegree? conj row = some n) :
     0 < n ∧ n ∣ Fintype.card G ∧
@@ -133,7 +133,7 @@ satisfying the degree-square equation. A homomorphism to a characteristic-zero d
 that no competing natural degree can satisfy it. -/
 theorem recoverCharacterDegree?_eq_some_iff [DecidableEq R]
     {K : Type*} [CommSemiring K] [IsDomain K] [CharZero K] (f : R →+* K)
-    (conj : R →+* R) (row : Fin d.numClasses → R) (n : ℕ) :
+    (conj : R → R) (row : Fin d.numClasses → R) (n : ℕ) :
     d.recoverCharacterDegree? conj row = some n ↔
       0 < n ∧ n ∣ Fintype.card G ∧
         (n : R) ^ 2 * d.clearedClassRowNorm conj row =
