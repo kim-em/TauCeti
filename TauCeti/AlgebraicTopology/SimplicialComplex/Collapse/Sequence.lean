@@ -50,6 +50,10 @@ private theorem ElementaryCollapsesTo.exists_strong_deformation_retraction_flat
   let X : Set (Realization A) := {x | x.1.support ∈ K}
   let Y : Set (Realization A) := {x | x.1.support ∈ L}
   let i : C(Y, X) := ContinuousMap.inclusion (fun _ hx => h.le hx)
+  -- Coercing the set X to a type gives exactly the subtype
+  -- {x : Realization A // x.1.support ∈ K} used by the elementary theorem,
+  -- with the same induced topology. Thus r, hr, and H need no source transport;
+  -- the first endpoint of H.toHomotopy.cast below is unchanged (rfl).
   -- The nested target stores both K- and L-membership. Flatten it by retaining
   -- the ambient point and L-membership; continuity follows from the two projections.
   let r' : C(X, Y) :=
@@ -117,7 +121,7 @@ theorem Collapsible.contractibleSpace (h : Collapsible K)
   obtain ⟨r, _, hR⟩ := hv.exists_strong_deformation_retraction hK
   let X := {x : Realization A // x.1.support ∈ K}
   let p : X := ⟨vertex A v, hv.le (by
-    rw [vertex_val, Finsupp.support_single _ one_ne_zero]
+    rw [support_vertex]
     exact mem_point.mpr rfl)⟩
   have hend :
       (ContinuousMap.inclusion
@@ -127,10 +131,7 @@ theorem Collapsible.contractibleSpace (h : Collapsible K)
     apply ContinuousMap.ext
     intro x
     apply Subtype.ext
-    apply (Realization.eq_vertex_iff A (r x).1 v).mpr
-    have hsupp := mem_point.mp (r x).2
-    simpa only [Finsupp.sum, hsupp, Finset.sum_singleton] using
-      Realization.sum_eq_one A (r x).1
+    exact Realization.eq_vertex_of_support_eq A (r x).1 (mem_point.mp (r x).2)
   exact (contractible_iff_id_nullhomotopic X).mpr ⟨p, hend ▸ hR.homotopic⟩
 
 end PreAbstractSimplicialComplex
