@@ -50,9 +50,10 @@ theorem det_add_smul_vecMulVec (A : Matrix ι ι R) (u v : ι → R) (c : R) :
     by_cases hcard : s.card = 1
     · obtain ⟨i, rfl⟩ := Finset.card_eq_one.mp hcard
       simp [d, Finset.piecewise_singleton, D.map_update_smul, mul_assoc]
-    · obtain ⟨i, hi, j, hj, hij⟩ := Finset.one_lt_card.mp (show 1 < s.card from by
+    · have hs_card : 1 < s.card := by
         have : 0 < s.card := Finset.card_pos.mpr (Finset.nonempty_iff_ne_empty.mpr hs)
-        omega)
+        omega
+      obtain ⟨i, hi, j, hj, hij⟩ := Finset.one_lt_card.mp hs_card
       have hz (a : R) : d a s = 0 := by
         have hfactor : s.piecewise (fun i => (a * u i) • v) (fun i => A i) =
             fun i => (if i ∈ s then a * u i else 1) •
