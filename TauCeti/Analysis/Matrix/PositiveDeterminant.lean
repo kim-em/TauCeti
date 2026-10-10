@@ -12,6 +12,9 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 /-!
 # Smooth paths of real matrices with positive determinant
 
+Over any nontrivially normed field, a special-linear matrix admits a smooth determinant-one
+family from the identity, parameterized by the field.
+
 Every real matrix with positive determinant is joined to the identity by a smooth family of
 matrices with positive determinant, defined on all of `ℝ`. First use generation by elementary
 transvections to construct a determinant-one family. Then restore the determinant by multiplying
@@ -30,15 +33,15 @@ open scoped ContDiff Matrix.Norms.Elementwise
 
 namespace Matrix.SpecialLinearGroup
 
-variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+variable {𝕜 ι : Type*} [NontriviallyNormedField 𝕜] [Fintype ι] [DecidableEq ι]
 
-/-- A real special-linear matrix is joined to the identity by a smooth matrix family whose
-determinant is one for every real parameter. -/
-theorem exists_contDiff_det_eq_one (A : SpecialLinearGroup ι ℝ) :
-    ∃ γ : ℝ → Matrix ι ι ℝ, ContDiff ℝ ∞ γ ∧ γ 0 = 1 ∧ γ 1 = A ∧
+/-- A special-linear matrix over a nontrivially normed field admits a smooth matrix family
+from the identity whose determinant is one for every parameter in the field. -/
+theorem exists_contDiff_det_eq_one (A : SpecialLinearGroup ι 𝕜) :
+    ∃ γ : 𝕜 → Matrix ι ι 𝕜, ContDiff 𝕜 ∞ γ ∧ γ 0 = 1 ∧ γ 1 = A ∧
       ∀ t, (γ t).det = 1 := by
   have hA : A ∈ Subgroup.closure (Set.range (TransvectionStruct.toSpecialLinearGroup :
-      TransvectionStruct ι ℝ → SpecialLinearGroup ι ℝ)) := by
+      TransvectionStruct ι 𝕜 → SpecialLinearGroup ι 𝕜)) := by
     rw [closure_range_toSpecialLinearGroup_eq_top_of_field]
     exact Subgroup.mem_top A
   induction hA using Subgroup.closure_induction with
@@ -64,7 +67,7 @@ theorem exists_contDiff_det_eq_one (A : SpecialLinearGroup ι ℝ) :
       by simp [hγ1, hδ1], fun t => by simp [det_mul, hγdet, hδdet]⟩
   | inv A _ hA =>
     obtain ⟨γ, hγ, hγ0, hγ1, hγdet⟩ := hA
-    refine ⟨fun t => γ (1 - t) * (↑(A⁻¹) : Matrix ι ι ℝ),
+    refine ⟨fun t => γ (1 - t) * (↑(A⁻¹) : Matrix ι ι 𝕜),
       (hγ.comp (contDiff_const.sub contDiff_id)).matrix_mul contDiff_const, ?_, ?_, ?_⟩
     · simp only [sub_zero, hγ1, ← coe_mul, mul_inv_cancel, coe_one]
     · simp only [sub_self, hγ0, one_mul]
