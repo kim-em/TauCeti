@@ -8,6 +8,7 @@ module
 public import TauCeti.RepresentationTheory.Symmetric.Standard
 import TauCeti.RepresentationTheory.PGroupInvariants
 import TauCeti.GroupTheory.Perm.FinThree.Basic
+import TauCeti.RepresentationTheory.Intertwining
 
 /-!
 # Simple representations of S₃ in characteristic two
@@ -36,6 +37,15 @@ universe u v
 
 variable {k : Type u} [Field k] [CharP k 2]
   {V : Type v} [AddCommGroup V] [Module k V]
+
+/-- The two-dimensional standard representation of S₃ is irreducible over any field of
+characteristic two. -/
+theorem isIrreducible_standardRepresentation_fin_three_of_charTwo :
+    (standardRepresentation k (Fin 3)).IsIrreducible :=
+  isIrreducible_standardRepresentation (by decide)
+    (Or.inr (by
+      rw [Fintype.card_fin]
+      exact fun h ↦ (by norm_num : ¬ 2 ∣ 3) ((CharP.cast_eq_zero_iff k 2 3).mp h)))
 
 private theorem exists_nonzero_permutation_intertwiner [Nontrivial V]
     (ρ : Representation k (Equiv.Perm (Fin 3)) V) :
@@ -94,7 +104,7 @@ theorem _root_.Representation.IsIrreducible.nonempty_equiv_trivial_or_standard_p
     rw [Fintype.card_fin]
     exact fun h ↦ (by norm_num : ¬ 2 ∣ 3) ((CharP.cast_eq_zero_iff k 2 3).mp h)
   have hstd : (standardRepresentation k (Fin 3)).IsIrreducible :=
-    isIrreducible_standardRepresentation (by decide) (Or.inr hthree)
+    isIrreducible_standardRepresentation_fin_three_of_charTwo
   have : (augmentationSubrepresentation k (Equiv.Perm (Fin 3))
       (Fin 3)).toRepresentation.IsIrreducible := by
     simpa only [toRepresentation_augmentationSubrepresentation] using hstd
@@ -108,21 +118,12 @@ theorem _root_.Representation.IsIrreducible.nonempty_equiv_trivial_or_standard_p
     by_contra h
     push Not at h
     apply hf
+    have hF : F = 0 := IntertwiningMap.prod_ext
+      h.1 h.2
     apply IntertwiningMap.ext
     apply LinearMap.ext
     intro x
-    have he := DFunLike.congr_fun
-      (IntertwiningMap.coprod_inl_inr (A := k)
-        (ρ := trivial k (Equiv.Perm (Fin 3)) k)
-        (σ := (augmentationSubrepresentation k (Equiv.Perm (Fin 3))
-          (Fin 3)).toRepresentation)) (e x)
-    simp only [IntertwiningMap.id_apply, IntertwiningMap.coe_add, Pi.add_apply] at he
-    have hz : F (e x) = 0 := by
-      rw [← he, map_add]
-      have ha := DFunLike.congr_fun h.1 (e x).1
-      have hb := DFunLike.congr_fun h.2 (e x).2
-      simpa [a, b, IntertwiningMap.comp_apply, IntertwiningMap.fst,
-        IntertwiningMap.snd] using congrArg₂ (· + ·) ha hb
+    have hz := DFunLike.congr_fun hF (e x)
     simpa [F] using hz
   rcases hab with ha | hb
   · exact Or.inl ⟨(a.ofBijective ((IsIrreducible.bijective_or_eq_zero a).resolve_right ha)).symm⟩

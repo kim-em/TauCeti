@@ -5,10 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.GrothendieckGroup.SimpleBasis
+public import TauCeti.RepresentationTheory.GrothendieckGroup.GroupAlgebra.SimpleBasis
 public import TauCeti.RepresentationTheory.Symmetric.Modular.Three.CharTwo
-import TauCeti.RepresentationTheory.AsModule
-import TauCeti.RepresentationTheory.OfModule
 
 /-!
 # The simple-class basis for S₃ in characteristic two
@@ -63,9 +61,7 @@ private instance simpleFamily_isSimpleModule (b : Bool) :
       (Representation.trivial k (Equiv.Perm (Fin 3)) k)).mp inferInstance
   · exact (_root_.Representation.irreducible_iff_isSimpleModule_asModule
       (standardRepresentation k (Fin 3))).mp
-        (isIrreducible_standardRepresentation (by decide) (Or.inr (by
-          rw [Fintype.card_fin]
-          exact fun h ↦ (by norm_num : ¬ 2 ∣ 3) ((CharP.cast_eq_zero_iff k 2 3).mp h))))
+        isIrreducible_standardRepresentation_fin_three_of_charTwo
 
 /-- The trivial and standard classes form an integral basis of the exact Grothendieck group
 of S₃ in characteristic two. The index `false` denotes the trivial class and `true` the
@@ -81,27 +77,15 @@ noncomputable def symmetricThreeCharTwoSimpleClassBasis :
     · exact ⟨fun e ↦ (trivial_standard_not_equiv k).false e.symm⟩
     · exact (hbc rfl).elim
   have hexhaustive : IsExhaustiveSimpleFamily S := by
-    rw [isExhaustiveSimpleFamily_iff]
-    intro M hM
-    let := hM
-    let := Module.restrictScalars k k[Equiv.Perm (Fin 3)] M
-    let := IsScalarTower.restrictScalars k k[Equiv.Perm (Fin 3)] M
-    let ρ := Representation.ofModule' (k := k) (G := Equiv.Perm (Fin 3)) M
-    have hρ : ρ.IsIrreducible :=
-      (Representation.isIrreducible_ofModule'_iff M).mpr hM
+    apply isExhaustiveSimpleFamily_of_forall_isIrreducible
+    intro V _ _ ρ hρ
     rcases hρ.nonempty_equiv_trivial_or_standard_perm_fin_three with h | h
     · obtain ⟨e⟩ := h
-      have he : Nonempty (M ≃ₗ[k[Equiv.Perm (Fin 3)]]
-          (Representation.trivial k (Equiv.Perm (Fin 3)) k).asModule) :=
-        ⟨(Representation.ofModule'AsModuleEquiv M).symm.trans
-          (Representation.asModuleLinearEquivOfEquiv e)⟩
-      exact ⟨false, he⟩
+      have he := Representation.asModuleLinearEquivOfEquiv e
+      exact ⟨false, ⟨he⟩⟩
     · obtain ⟨e⟩ := h
-      have he : Nonempty (M ≃ₗ[k[Equiv.Perm (Fin 3)]]
-          (standardRepresentation k (Fin 3)).asModule) :=
-        ⟨(Representation.ofModule'AsModuleEquiv M).symm.trans
-          (Representation.asModuleLinearEquivOfEquiv e)⟩
-      exact ⟨true, he⟩
+      have he := Representation.asModuleLinearEquivOfEquiv e
+      exact ⟨true, ⟨he⟩⟩
   exact simpleClassBasis S hnoniso hexhaustive
 
 /-- Each basis vector is the class of the corresponding simple representation. -/
@@ -113,6 +97,8 @@ theorem symmetricThreeCharTwoSimpleClassBasis_apply (b : Bool) :
     else ExactK0.of (FGModuleCat.of k[Equiv.Perm (Fin 3)]
       (Representation.trivial k (Equiv.Perm (Fin 3)) k).asModule) := by
   unfold symmetricThreeCharTwoSimpleClassBasis
+  -- Splitting the Boolean index reduces both the `simpleFamily` match and the `if`
+  -- in the stated formula, so each branch is exactly `simpleClassBasis_apply`.
   cases b <;> exact simpleClassBasis_apply ..
 
 /-- The two coordinates are the trivial and standard composition multiplicities,
@@ -125,6 +111,7 @@ theorem symmetricThreeCharTwoSimpleClassBasis_repr_apply
     else jordanHolderCoordinate k[Equiv.Perm (Fin 3)]
       (Representation.trivial k (Equiv.Perm (Fin 3)) k).asModule x := by
   unfold symmetricThreeCharTwoSimpleClassBasis
+  -- Splitting the Boolean index reduces the `simpleFamily` match and the displayed `if`.
   cases b <;> exact simpleClassBasis_repr_apply ..
 
 end TauCeti
