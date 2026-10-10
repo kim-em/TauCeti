@@ -58,7 +58,7 @@ theorem exists_isRightAlmostSplit (h : IsFiniteRepType.{u, v, w, t} k Q)
     finiteDimensional_hom (hX i) Y.property
   have : IsLocalRing (End Y.obj) := (indecomposable_iff_isLocalRing_end Y.property).mp hiY
   -- Bases of the finitely many radical spaces give one finite-dimensional source.
-  obtain ⟨n, f, hf, hfactor⟩ := exists_radical_biproduct_factorization (k := k) X Y.obj
+  obtain ⟨n, f, hf, hfactor⟩ := exists_jacobsonRadical_biproduct_factorization (k := k) X Y.obj
   let Z (j : Σ i, Fin (n i)) := X j.1
   let E : ObjectProperty.FullSubcategory (IsFinDim.{u, v, w, t} k Q) :=
     ⟨⨁ Z, isFinDim_biproduct Z (fun j ↦ hX j.1)⟩
@@ -76,8 +76,8 @@ theorem exists_isRightAlmostSplit (h : IsFiniteRepType.{u, v, w, t} k Q)
         biproduct.ι P j ≫ d.inv ≫ g.hom := by
       let c := irreducibleMorphismQuiver.representativeIso (hP j) (hiP j)
       let i := e (irreducibleMorphismQuiver.of (hP j) (hiP j))
-      have hc : X i ≅ P j := by
-        simpa only [X, i, Equiv.symm_apply_apply] using c
+      let hc : X i ≅ P j :=
+        eqToIso (congrArg irreducibleMorphismQuiver.representative (e.symm_apply_apply _)) ≪≫ c
       obtain ⟨a, ha⟩ := hfactor i (hc.hom ≫ biproduct.ι P j ≫ d.inv ≫ g.hom)
         (by simpa only [Category.assoc] using
           comp_mem_jacobsonRadical_left (hc.hom ≫ biproduct.ι P j ≫ d.inv) hrad)

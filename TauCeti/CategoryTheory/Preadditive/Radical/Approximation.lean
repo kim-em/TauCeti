@@ -39,7 +39,7 @@ variable {C : Type u} [Category.{v} C] [Preadditive C]
 /-- A finite family with finite-dimensional radical spaces admits a single radical morphism
 through which all its radical morphisms factor. Its source is a finite biproduct of copies of
 the given objects. -/
-theorem exists_radical_biproduct_factorization {ι : Type*} [Finite ι] (X : ι → C) (Y : C)
+theorem exists_jacobsonRadical_biproduct_factorization {ι : Type*} [Finite ι] (X : ι → C) (Y : C)
     [∀ i, FiniteDimensional k (jacobsonRadicalSubmodule k (X i) Y)] :
     ∃ (n : ι → ℕ) (f : (⨁ fun j : Σ i, Fin (n i) ↦ X j.1) ⟶ Y),
       f ∈ jacobsonRadical _ Y ∧ ∀ i (g : X i ⟶ Y), g ∈ jacobsonRadical (X i) Y →

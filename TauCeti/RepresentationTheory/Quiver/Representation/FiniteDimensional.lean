@@ -106,6 +106,7 @@ theorem isFinDim_biproduct {ι : Type*} [Finite ι]
     (M : ι → QuiverRep.{u, v, w, t} k Q) (hM : ∀ i, IsFinDim k Q (M i)) :
     IsFinDim k Q (Limits.biproduct M) := by
   intro v
+  -- Reindex to `Fin n` because `ModuleCat.biproductIsoPi` requires an index type in `Type`.
   obtain ⟨n, ⟨r⟩⟩ := Finite.exists_equiv_fin ι
   let M' (i : Fin n) := M (r.symm i)
   have (i : Fin n) : FiniteDimensional k ((M' i).obj v) := hM (r.symm i) v
