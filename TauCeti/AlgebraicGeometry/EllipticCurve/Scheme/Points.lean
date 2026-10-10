@@ -57,6 +57,9 @@ zero section corresponding to the point at infinity.
   prime `x` of `S` exactly when `Pⱼ ∉ x`.
 * `WeierstrassCurve.projModelPoint_eq_projModelPoint_iff`: two such points are equal exactly when
   they lie over the same ring homomorphism and their homogeneous coordinates differ by a unit.
+* `WeierstrassCurve.projModelPoint_eq_projModelPoint_iff_of_apply_eq`: two such points with the
+  same unit coordinate `Pᵢ = Qᵢ` are equal exactly when they lie over the same ring homomorphism
+  and have the same homogeneous coordinates.
 * `WeierstrassCurve.SpecMap_projModelPoint`: the point is natural in the ring `S`.
 * `WeierstrassCurve.projModelPoint_map`: `Proj.map F` of a graded ring homomorphism `F` of
   homogeneous coordinate rings carries the point with homogeneous coordinates `P'` to the point
@@ -69,10 +72,10 @@ zero section corresponding to the point at infinity.
 * `WeierstrassCurve.projModelPoint_projModelVariableChangeIso_hom`: the isomorphism
   `projModel (C • W) ≅ projModel W` induced by a change of variables `C` sends the point with
   homogeneous coordinates `P` to the point with homogeneous coordinates `(C.map g).toMatrix *ᵥ P`.
-* `WeierstrassCurve.projModelPointsEquivUnimodular_projModelZero`: the zero section corresponds to
-  the class of `(0, 1, 0)`.
 * `WeierstrassCurve.projModelPointsEquivUnimodular_projModelPoint`: the section with homogeneous
   coordinates `P` corresponds to the class of `P`.
+* `WeierstrassCurve.projModelPointsEquivUnimodular_projModelZero`: the zero section corresponds to
+  the class of `(0, 1, 0)`.
 * `WeierstrassCurve.projModelPointsEquivUnimodular_symm_mk`: the class of a representative `P`
   with unit coordinate `Pᵢ` corresponds to the section through the chart `D₊(Xᵢ)` at which
   `Xₖ / Xᵢ = Pₖ / Pᵢ`.
@@ -84,6 +87,18 @@ zero section corresponding to the point at infinity.
 * `WeierstrassCurve.exists_eq_projModelPoint`: a point of the projective model with values in a
   local ring `S`, lying over `Spec g`, is the point with homogeneous coordinates `P`, for some
   solution `P` of the projective Weierstrass equation of `W.map g` with a unit coordinate.
+* `WeierstrassCurve.exists_ringHom_eq_projModelPoint`: a point of the projective model with values
+  in a local ring `S` is the point with homogeneous coordinates `P`, for some ring homomorphism
+  `g : R →+* S` and some solution `P` of the projective Weierstrass equation of `W.map g` with a
+  unit coordinate.
+* `WeierstrassCurve.exists_eq_projModelPoint_of_forall_mem_basicOpen`: a point of the projective
+  model with values in a commutative ring `S`, lying over `Spec g`, all of whose values lie on the
+  chart `D₊(Xᵢ)`, is the point with homogeneous coordinates `Q`, for some solution `Q` of the
+  projective Weierstrass equation of `W.map g` with `Qᵢ = 1`.
+* `WeierstrassCurve.SpecMap_projModelZero`: the zero section, restricted along `Spec g`, is the
+  point with homogeneous coordinates `(0, 1, 0)`.
+* `WeierstrassCurve.projModelZero_eq_projModelPoint`: the zero section is the point with
+  homogeneous coordinates `(0, 1, 0)`, along the identity of `R`.
 * `WeierstrassCurve.projModelPointsEquiv_projModelZero`: the zero section corresponds to `0`.
 * `WeierstrassCurve.projModelPointsEquiv_symm_some`: the affine point `(x, y)` corresponds to
   `Spec` of `chartRingEval` at `(x, y)`, followed by the inclusion of the chart `D₊(Z)`.
@@ -110,6 +125,24 @@ values in a field through a chart (`specPoint_factors_through_chart`, file
 `WeierstrassModel.lean`) and reads off that the chart homomorphism is compatible with the
 `R`-algebra structures (`chartHom_compat_of_specPoint`, file `AdditionSpecPoints.lean`); here the
 point has values in any local ring `S`, over any ring homomorphism `g : R →+* S`.
+
+`SpecMap_projModelZero` corresponds to AINTLIB's `projModelFromOfGlobalSections_zero_one_zero`
+(file `WeierstrassModelCoordinateTransition.lean`), which rests, as here, on the equality of
+evaluation homomorphisms `projModelEval_zero_one_zero` (file `WeierstrassModelCoordinates.lean`):
+evaluation at `(0, 1, 0)` along a ring homomorphism `f` is `f` after the evaluation defining the
+zero section. There, for a Weierstrass curve over the ring of global sections of a scheme `X`, the
+morphism from `X` with homogeneous coordinates `(0, 1, 0)`, built by `Proj.fromOfGlobalSections`,
+is the zero section preceded by `X ⟶ Spec Γ(X, ⊤)`; here the zero section restricted along any ring
+homomorphism `g : R →+* S` is the point `projModelPoint` with homogeneous coordinates `(0, 1, 0)`,
+along `g`. `exists_ringHom_eq_projModelPoint` is not stated in AINTLIB, whose computations on
+points with values in a field `K` take `K` with the algebra structure for which the composite of
+the point with the structure morphism is `Spec` of the structure homomorphism
+(`structure_eq_specMap`, file `GroupLawAxioms.lean`).
+`exists_eq_projModelPoint_of_forall_mem_basicOpen` corresponds to AINTLIB's `chartHomEquiv` (file
+`WeierstrassModel.lean`), which identifies the points over the base, with values in a commutative
+`R`-algebra, that factor through the chart `D₊(Xᵢ)` with the ring homomorphisms out of `A_(Xᵢ)`
+compatible with the `R`-algebra structures; here the factorisation is deduced from the values of
+the point lying on the chart, and the point is given by homogeneous coordinates.
 
 Adapted from AINTLIB (`github.com/CBirkbeck/AINTLIB`, Apache-2.0) at commit
 `c3415f32a313e19ace43e05479aeaa0d56ca287a`, file
@@ -294,6 +327,18 @@ theorem projModelPoint_eq_projModelPoint_iff {g' : R →+* S} {Q : Fin 3 → S}
     exact (projModelPoint_smul (hP := hQ) u (by simpa [Units.smul_def] using hi)).trans
       (projModelPoint_eq_of_isUnit _ _)
 
+/-- Two points of the projective model, with homogeneous coordinates `P` along `g` and `Q` along
+`g'` with the same unit coordinate `Pᵢ = Qᵢ`, are equal exactly when `g = g'` and `P = Q`. -/
+theorem projModelPoint_eq_projModelPoint_iff_of_apply_eq {g' : R →+* S} {Q : Fin 3 → S}
+    {hQ : (W.toProjective.map g').Equation Q} {j : Fin 3} {hi : IsUnit (P i)} {hj : IsUnit (Q j)}
+    (h : P i = Q i) : W.projModelPoint g hP hi = W.projModelPoint g' hQ hj ↔ g = g' ∧ P = Q := by
+  rw [projModelPoint_eq_projModelPoint_iff]
+  refine and_congr_right fun _ ↦ ⟨fun ⟨u, hu⟩ ↦ ?_, fun hPQ ↦ ⟨1, by rw [one_smul, hPQ]⟩⟩
+  -- the `i`-th coordinates are `Pᵢ` and `u * Pᵢ`, so `u = 1`
+  have hu1 : (u : S) = 1 := hi.mul_eq_right.mp <| by
+    simpa only [Pi.smul_apply, Units.smul_def, smul_eq_mul, ← h] using (congrFun hu i).symm
+  rw [hu, Units.smul_def, hu1, one_smul]
+
 variable (W) in
 /-- The standard affine chart `D₊(Xᵢ)` of the projective model is the point with homogeneous
 coordinates the universal point `chartPoint i` of the chart ring `R[X₀, X₁, X₂] ⧸ (W, Xᵢ - 1)`. -/
@@ -306,7 +351,7 @@ theorem chartι_eq_projModelPoint (i : Fin 3) :
   congr 2
   ext z
   obtain ⟨n, a, ha, rfl⟩ := Away.mk_surjective _ (W.toProjective.coord_mem_grading i) z
-  obtain ⟨p, hp, rfl⟩ := W.toProjective.mem_grading_iff.mp ha
+  obtain ⟨p, _, rfl⟩ := W.toProjective.mem_grading_iff.mp ha
   -- the unit coordinate is `1`, and evaluation at the classes of the variables is the quotient map
   have hu : (W.toProjective.chartPoint_self i ▸ isUnit_one :
       IsUnit (W.toProjective.chartPoint i i)).unit = 1 :=
@@ -508,8 +553,11 @@ theorem SpecMap_chartι {A : CommRingCat.{u}} {i : Fin 3}
 homogeneous coordinates: for a local ring `S`, a ring homomorphism `g : R →+* S` and
 `x : Spec S ⟶ projModel W` over `Spec g`, `x` is the point with homogeneous coordinates `P` for
 some solution `P` of the projective Weierstrass equation of `W.map g` with a unit coordinate.
-Such a `P` is unique up to a unit (`projModelPoint_eq_projModelPoint_iff`). For a ring `S` that is
-not local, a point through the chart `D₊(Xᵢ)` is described by `SpecMap_chartι`. -/
+Such a `P` is unique up to a unit (`projModelPoint_eq_projModelPoint_iff`). For a point with no
+`g` given, see `exists_ringHom_eq_projModelPoint`. For a ring `S` that is not local, a point all
+of whose values lie on the chart `D₊(Xᵢ)` is described by
+`exists_eq_projModelPoint_of_forall_mem_basicOpen`, and a point `Spec α` of that chart by
+`SpecMap_chartι`. -/
 theorem exists_eq_projModelPoint {S : Type u} [CommRing S] [IsLocalRing S] {g : R →+* S}
     {x : Spec (.of S) ⟶ W.projModel} (hx : x ≫ W.projModelOver = Spec.map (CommRingCat.ofHom g)) :
     ∃ (P : Fin 3 → S) (hP : (W.toProjective.map g).Equation P) (i : Fin 3) (hi : IsUnit (P i)),
@@ -527,6 +575,73 @@ theorem exists_eq_projModelPoint {S : Type u} [CommRing S] [IsLocalRing S] {g : 
       CommRingCat.hom_ofHom] using hx
   exact ⟨_, _, i, _, rfl⟩
 
+/-- A point of the projective Weierstrass model with values in a local ring is given by
+homogeneous coordinates, along some ring homomorphism: for a local ring `S` and
+`x : Spec S ⟶ projModel W`, there are a ring homomorphism `g : R →+* S` and a solution `P` of the
+projective Weierstrass equation of `W.map g` with a unit coordinate such that `x` is the point
+with homogeneous coordinates `P`. Such a `g` is unique, and `P` is unique up to a unit
+(`projModelPoint_eq_projModelPoint_iff`). For a point lying over a given `g`, see
+`exists_eq_projModelPoint`. -/
+theorem exists_ringHom_eq_projModelPoint {S : Type u} [CommRing S] [IsLocalRing S]
+    (x : Spec (.of S) ⟶ W.projModel) :
+    ∃ (g : R →+* S) (P : Fin 3 → S) (hP : (W.toProjective.map g).Equation P) (i : Fin 3)
+      (hi : IsUnit (P i)), x = W.projModelPoint g hP hi := by
+  -- `x` lies over `Spec φ` for a ring homomorphism `φ`
+  obtain ⟨φ, hφ⟩ := Spec.map_surjective (x ≫ W.projModelOver)
+  exact ⟨φ.hom, W.exists_eq_projModelPoint (by rw [← hφ, CommRingCat.ofHom_hom])⟩
+
+/-- A point of the projective Weierstrass model with values in a commutative ring `S`, lying over
+`Spec g` for a ring homomorphism `g : R →+* S`, all of whose values lie on the standard affine
+chart `D₊(Xᵢ)`, is the point with homogeneous coordinates `Q`, along `g`, for some solution `Q` of
+the projective Weierstrass equation of `W.map g` whose `i`-th coordinate is `1`. Such a `Q` is
+unique (`projModelPoint_eq_projModelPoint_iff_of_apply_eq`). For a local ring `S`, the hypothesis
+holds for some `i`; see `exists_eq_projModelPoint`. -/
+theorem exists_eq_projModelPoint_of_forall_mem_basicOpen {S : Type u} [CommRing S] {g : R →+* S}
+    {x : Spec (.of S) ⟶ W.projModel} (hx : x ≫ W.projModelOver = Spec.map (CommRingCat.ofHom g))
+    {i : Fin 3} (hxi : ∀ s, x s ∈ Proj.basicOpen W.toProjective.grading (W.toProjective.coord i)) :
+    ∃ (Q : Fin 3 → S) (hQ : (W.toProjective.map g).Equation Q) (hQi : Q i = 1),
+      x = W.projModelPoint g hQ (i := i) (by simpa only [hQi] using isUnit_one) := by
+  -- `x` is `Spec α` followed by the chart, for a homomorphism `α` out of the chart ring
+  have hrange : Set.range x ⊆ Set.range (W.chartι i) := by
+    simpa only [← Scheme.Hom.coe_opensRange, W.opensRange_chartι i, Set.range_subset_iff,
+      SetLike.mem_coe] using hxi
+  obtain ⟨α, hα⟩ := Spec.map_surjective (IsOpenImmersion.lift (W.chartι i) x hrange)
+  have hfac := IsOpenImmersion.lift_fac (W.chartι i) x hrange
+  rw [← hα, W.SpecMap_chartι] at hfac
+  -- it lies over `Spec g` and over `Spec` of the composite `R → ChartRing i → S`
+  obtain rfl : α.hom.comp (algebraMap R _) = g := by
+    simpa only [projModelPoint_projModelOver, hx, Spec.map_inj, CommRingCat.hom_ext_iff,
+      CommRingCat.hom_ofHom] using congrArg (· ≫ W.projModelOver) hfac
+  exact ⟨_, _, by rw [Function.comp_apply, Projective.chartPoint_self, map_one], hfac.symm⟩
+
+/-- The zero section `[0 : 1 : 0]` of the projective model, restricted along `Spec g` for a ring
+homomorphism `g : R →+* S`, is the point with homogeneous coordinates `(0, 1, 0)`, along `g`. The
+case `g = RingHom.id R` describes the zero section itself (`projModelZero_eq_projModelPoint`). -/
+@[reassoc (attr := simp)]
+theorem SpecMap_projModelZero {S : Type u} [CommRing S] (g : R →+* S) :
+    Spec.map (CommRingCat.ofHom g) ≫ W.projModelZero =
+      W.projModelPoint g (W.toProjective.map g).equation_zero (i := 1)
+        (by simpa only [Matrix.cons_val_one, Matrix.cons_val_zero] using isUnit_one) := by
+  -- evaluating at `[0 : 1 : 0]` and then applying `g` is evaluating at `(0, 1, 0)` along `g`
+  have h : g.comp W.toProjective.evalZero.toRingHom =
+      W.toProjective.evalHom g (W.toProjective.map g).equation_zero := by
+    refine RingHom.ext fun a ↦ ?_
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective a
+    rw [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, Projective.evalZero_mk,
+      Projective.evalHom_mk, eval₂_comp, Projective.comp_fin3, map_zero, map_one]
+  -- both sides are `Spec` of a homomorphism `A_(Y) → S` induced by evaluation at `[0 : 1 : 0]`,
+  -- followed by the inclusion of `D₊(Y)`
+  simp only [projModelZero, projModelPoint, ← Spec.map_comp_assoc, ← CommRingCat.ofHom_comp,
+    awayYEvalZero, Projective.awayEvalHom_def, RingHom.comp_homogeneousLocalizationAwayLift, h]
+
+/-- The zero section `[0 : 1 : 0]` of the projective model is the point with homogeneous
+coordinates `(0, 1, 0)`, along the identity of `R`. -/
+theorem projModelZero_eq_projModelPoint :
+    W.projModelZero = W.projModelPoint (RingHom.id R)
+      (W.toProjective.map (RingHom.id R)).equation_zero (i := 1)
+      (by simpa only [Matrix.cons_val_one, Matrix.cons_val_zero] using isUnit_one) := by
+  rw [← W.SpecMap_projModelZero (RingHom.id R), CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
+
 private theorem sectionOfClass_surjective [IsLocalRing R] :
     Function.Surjective W.sectionOfClass := by
   rintro ⟨g, hg⟩
@@ -539,7 +654,7 @@ private theorem sectionOfClass_surjective [IsLocalRing R] :
   obtain ⟨hQ, hi, hαQ⟩ := exists_eq_awayEvalHom (α := α.hom) (Q := Q)
     (congrArg CommRingCat.Hom.hom hg) fun _ ↦ rfl
   refine ⟨⟨⟦Q⟧, (Projective.unimodularLift_iff _).mpr
-      ⟨hQ, TauCeti.Module.isUnimodular_of_isUnit_apply hi⟩⟩,
+      ⟨hQ, hi.isUnimodular_pi⟩⟩,
     Subtype.ext <| (W.sectionOfClass_mk _).trans <| (W.repPoint_eq hQ hi).trans ?_⟩
   rw [projModelPoint, ← hαQ, CommRingCat.ofHom_hom]
 
@@ -563,26 +678,6 @@ noncomputable def projModelPointsEquivUnimodular :
       {P : Projective.PointClass R // W.toProjective.UnimodularLift P} :=
   (Equiv.ofBijective _ W.sectionOfClass_bijective).symm
 
-/-- The zero section `[0 : 1 : 0]` of the projective model corresponds to the class of
-`(0, 1, 0)`. -/
-@[simp]
-theorem projModelPointsEquivUnimodular_projModelZero :
-    W.projModelPointsEquivUnimodular ⟨W.projModelZero, W.projModelZero_projModelOver⟩ =
-      ⟨⟦![0, 1, 0]⟧, W.toProjective.unimodularLift_zero⟩ := by
-  rw [projModelPointsEquivUnimodular, Equiv.symm_apply_eq]
-  refine Subtype.ext ?_
-  rw [Equiv.ofBijective_apply, sectionOfClass_mk,
-    W.repPoint_eq W.toProjective.equation_zero (i := 1) (by simp)]
-  simp only [projModelPoint, projModelZero, awayYEvalZero]
-  -- both sides are `Spec` of a homomorphism `A_(Y) → R` followed by the inclusion of `D₊(Y)`
-  rw [cancel_mono, Spec.map_inj, CommRingCat.hom_ext_iff, CommRingCat.hom_ofHom,
-    CommRingCat.hom_ofHom]
-  -- both homomorphisms are induced by evaluation at `[0 : 1 : 0]`
-  refine Eq.trans ?_ (Projective.awayEvalHom_def ..).symm
-  refine Away.lift_eq_of_forall_mem _ _ 1 (fun n a ha ↦ ?_) (W.toProjective.coord_mem_grading 1) _ _
-  obtain ⟨p, -, rfl⟩ := W.toProjective.mem_grading_iff.mp ha
-  simp [eval₂_id]
-
 /-- The section `projModelPoint W (RingHom.id R) hP hi` with homogeneous coordinates `P`, a
 solution of the projective Weierstrass equation with a unit coordinate `Pᵢ`, corresponds to the
 class of `P`. -/
@@ -593,11 +688,21 @@ theorem projModelPointsEquivUnimodular_projModelPoint {P : Fin 3 → R}
       Projective.PointClass R) = ⟦P⟧ := by
   have hE : W.toProjective.Equation P := by simpa only [WeierstrassCurve.map_id] using hP
   have hU : W.toProjective.UnimodularLift ⟦P⟧ := (Projective.unimodularLift_iff P).mpr
-    ⟨hE, TauCeti.Module.isUnimodular_of_isUnit_apply hi⟩
+    ⟨hE, hi.isUnimodular_pi⟩
   -- the section attached to the class of `P` is the point with homogeneous coordinates `P`
   refine congrArg Subtype.val ((Equiv.symm_apply_eq _).mpr (Subtype.ext ?_) :
     W.projModelPointsEquivUnimodular ⟨_, _⟩ = ⟨⟦P⟧, hU⟩)
   rw [Equiv.ofBijective_apply, sectionOfClass_mk, W.repPoint_eq hE hi]
+
+/-- The zero section `[0 : 1 : 0]` of the projective model corresponds to the class of
+`(0, 1, 0)`. -/
+@[simp]
+theorem projModelPointsEquivUnimodular_projModelZero :
+    W.projModelPointsEquivUnimodular ⟨W.projModelZero, W.projModelZero_projModelOver⟩ =
+      ⟨⟦![0, 1, 0]⟧, W.toProjective.unimodularLift_zero⟩ :=
+  -- the zero section is the point with homogeneous coordinates `(0, 1, 0)`
+  Subtype.ext <| by
+    simp only [W.projModelZero_eq_projModelPoint, projModelPointsEquivUnimodular_projModelPoint]
 
 /-- The class of a unimodular representative `P` with unit coordinate `Pᵢ` corresponds to the
 section through the chart `D₊(Xᵢ)` at which `Xₖ / Xᵢ = Pₖ / Pᵢ`: `Spec` of any `R`-algebra map
@@ -712,7 +817,7 @@ theorem projModelPointsEquiv_projModelPoint {P : Fin 3 → K}
   have hNS : W.toProjective.NonsingularLift ⟦P⟧ :=
     Projective.unimodularLift_iff_nonsingularLift.mp <| (Projective.unimodularLift_iff P).mpr
       ⟨by simpa only [WeierstrassCurve.map_id] using hP,
-        TauCeti.Module.isUnimodular_of_isUnit_apply hi⟩
+        hi.isUnimodular_pi⟩
   have h : (Projective.Point.equivUnimodularLift W.toProjective).symm
       (W.projModelPointsEquivUnimodular ⟨W.projModelPoint (RingHom.id K) hP hi, by simp⟩) =
         ⟨hNS⟩ :=

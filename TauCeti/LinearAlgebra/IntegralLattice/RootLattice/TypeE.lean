@@ -8,12 +8,10 @@ module
 public import Mathlib.LinearAlgebra.Matrix.Cartan.Basic
 public import TauCeti.LinearAlgebra.FiniteBilinearModule.Cyclic
 public import TauCeti.LinearAlgebra.IntegralLattice.Discriminant.Cardinality
-public import TauCeti.LinearAlgebra.IntegralLattice.Discriminant.Quadratic
 public import TauCeti.LinearAlgebra.IntegralLattice.Level
 public import TauCeti.LinearAlgebra.IntegralLattice.PosDef.Minimum
 public import TauCeti.LinearAlgebra.IntegralLattice.Signature
 public import TauCeti.LinearAlgebra.IntegralLattice.StandardCoordinates
-public import TauCeti.LinearAlgebra.IntegralLattice.Unimodular
 import Mathlib.Algebra.BigOperators.Field
 import TauCeti.LinearAlgebra.RootSystem.FiniteType.Dynkin
 
@@ -50,8 +48,8 @@ of `ϖ₁` has additive order exactly `3` because the first simple-root coordina
 and the discriminant group has that same order, so `ϖ₁` generates; the same argument with the
 second coordinate `3/2` of `ϖ₇` and the order `2` settles type `E₇`.
 
-The half-norm convention is the one fixed by the integral-lattices roadmap: `q_L(x) = ⟨x,x⟩ / 2`
-in `ℚ/ℤ`.  Nikulin's full-norm values for these rows are `4/3` and `3/2`.
+The half-norm convention is `q_L(x) = ⟨x,x⟩ / 2` in `ℚ/ℤ`.  Nikulin's full-norm values for these
+rows are `4/3` and `3/2`.
 
 Both cyclic discriminant forms are presented through
 `TauCeti.FiniteQuadraticModule.cyclic`, which builds the form on `ℤ/m` whose generator carries a
@@ -92,8 +90,6 @@ the branch node of the diagram is `α₄`, and `α₂` is the short arm.
 * J. H. Conway and N. J. A. Sloane, *Sphere Packings, Lattices and Groups*, Chapter 4, §8.
 * W. Ebeling, *Lattices and Codes*, Chapters 1 and 3.
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, plates V, VI, VII.
-* `TauCetiRoadmap/IntegralLattices/README.md`, Layer 5, the `E₆`, `E₇` and `E₈` rows of the ADE
-  table.
 -/
 
 public section
@@ -101,8 +97,6 @@ public section
 namespace TauCeti
 
 namespace IntegralLattice
-
-open Finset
 
 /-! ## The root lattice of type `E₆` -/
 
@@ -144,7 +138,7 @@ private theorem det_cartanMatrixE₆_ne_zero : (CartanMatrix.E 6).det ≠ 0 := b
   norm_num
 
 /-- The type `E₆` root lattice is nondegenerate because its Cartan matrix is nonsingular. -/
-noncomputable instance instIsNondegenerateTypeE₆RootLattice :
+instance instIsNondegenerateTypeE₆RootLattice :
     typeE₆RootLattice.IsNondegenerate := by
   rw [typeE₆RootLattice]
   refine isNondegenerate_ofGramMatrix _ _ _ ?_
@@ -173,7 +167,7 @@ theorem discriminant_typeE₆RootLattice : typeE₆RootLattice.discriminant = 3 
   decide
 
 /-- **The discriminant group of the type `E₆` root lattice has order `3`.** -/
--- This is not a `simp` lemma because `Nat.card_eq_fintype_card` rewrites its left-hand side.
+@[simp]
 theorem natCard_discriminantGroup_typeE₆RootLattice :
     Nat.card typeE₆RootLattice.DiscriminantGroup = 3 := by
   rw [natCard_discriminantGroup, discriminant_typeE₆RootLattice]
@@ -185,7 +179,7 @@ theorem natCard_discriminantGroup_typeE₆RootLattice :
 private def typeE₆WeightCoeff : Fin 6 → ℤ := ![4, 3, 5, 6, 4, 2]
 
 /-- The minuscule fundamental weight `ϖ₁` of type `E₆`, in simple-root coordinates. -/
-noncomputable def typeE₆MinusculeWeight : Fin 6 → ℚ :=
+def typeE₆MinusculeWeight : Fin 6 → ℚ :=
   fun j ↦ (typeE₆WeightCoeff j : ℚ) / 3
 
 @[simp]
@@ -429,7 +423,7 @@ private theorem det_cartanMatrixE₇_ne_zero : (CartanMatrix.E 7).det ≠ 0 := b
   norm_num
 
 /-- The type `E₇` root lattice is nondegenerate because its Cartan matrix is nonsingular. -/
-noncomputable instance instIsNondegenerateTypeE₇RootLattice :
+instance instIsNondegenerateTypeE₇RootLattice :
     typeE₇RootLattice.IsNondegenerate := by
   rw [typeE₇RootLattice]
   refine isNondegenerate_ofGramMatrix _ _ _ ?_
@@ -458,7 +452,7 @@ theorem discriminant_typeE₇RootLattice : typeE₇RootLattice.discriminant = 2 
   decide
 
 /-- **The discriminant group of the type `E₇` root lattice has order `2`.** -/
--- This is not a `simp` lemma because `Nat.card_eq_fintype_card` rewrites its left-hand side.
+@[simp]
 theorem natCard_discriminantGroup_typeE₇RootLattice :
     Nat.card typeE₇RootLattice.DiscriminantGroup = 2 := by
   rw [natCard_discriminantGroup, discriminant_typeE₇RootLattice]
@@ -470,7 +464,7 @@ theorem natCard_discriminantGroup_typeE₇RootLattice :
 private def typeE₇WeightCoeff : Fin 7 → ℤ := ![2, 3, 4, 6, 5, 4, 3]
 
 /-- The minuscule fundamental weight `ϖ₇` of type `E₇`, in simple-root coordinates. -/
-noncomputable def typeE₇MinusculeWeight : Fin 7 → ℚ :=
+def typeE₇MinusculeWeight : Fin 7 → ℚ :=
   fun j ↦ (typeE₇WeightCoeff j : ℚ) / 2
 
 @[simp]
@@ -692,6 +686,12 @@ theorem typeE₈SimpleRoot_apply (i j : Fin 8) :
     typeE₈SimpleRoot i j = if j = i then 1 else 0 := by
   simp [typeE₈SimpleRoot, Pi.basisFun_apply, Pi.single_apply]
 
+/-- The `i`-th simple root of type `E₈` is the `i`-th standard basis vector. -/
+-- Not a `simp` lemma: the definition is sealed so that `simp` keeps `typeE₈SimpleRoot i` intact.
+theorem typeE₈SimpleRoot_eq_basisFun (i : Fin 8) :
+    typeE₈SimpleRoot i = Pi.basisFun ℚ (Fin 8) i := by
+  rw [typeE₈SimpleRoot]
+
 /-- **The Gram matrix of the type `E₈` root lattice in its simple-root basis is the Cartan matrix
 `CartanMatrix.E 8`.** -/
 @[simp]
@@ -702,8 +702,8 @@ theorem form_typeE₈SimpleRoot_typeE₈SimpleRoot (i j : Fin 8) :
   exact form_ofGramMatrix_basisFun_basisFun _ _ i j
 
 /-- The carrier of the type `E₈` root lattice is the integral span of the simple roots. -/
--- This is not a `simp` lemma because `ofGramMatrix_carrier` first unfolds its left-hand side to a
--- bare `Submodule.span`; `mem_typeE₈RootLattice_carrier_iff` is the `simp` form.
+-- This is not a `simp` lemma: it would rewrite the left-hand side of the `simp` lemma
+-- `mem_typeE₈RootLattice_carrier_iff`.
 theorem typeE₈RootLattice_carrier :
     typeE₈RootLattice.carrier = Submodule.span ℤ (Set.range (Pi.basisFun ℚ (Fin 8))) := by
   rw [typeE₈RootLattice]
@@ -723,7 +723,7 @@ private theorem det_cartanMatrixE₈_ne_zero : (CartanMatrix.E 8).det ≠ 0 := b
   norm_num
 
 /-- The type `E₈` root lattice is nondegenerate because its Cartan matrix is nonsingular. -/
-noncomputable instance instIsNondegenerateTypeE₈RootLattice :
+instance instIsNondegenerateTypeE₈RootLattice :
     typeE₈RootLattice.IsNondegenerate := by
   rw [typeE₈RootLattice]
   refine isNondegenerate_ofGramMatrix _ _ _ ?_
@@ -787,7 +787,7 @@ instance instSubsingletonDiscriminantGroupTypeE₈RootLattice :
     isUnimodular_typeE₈RootLattice
 
 /-- **The discriminant group of the type `E₈` root lattice has order `1`.** -/
--- This is not a `simp` lemma because `Nat.card_eq_fintype_card` rewrites its left-hand side.
+-- This is not a `simp` lemma: `simp` already proves it by `Nat.card_unique`.
 theorem natCard_discriminantGroup_typeE₈RootLattice :
     Nat.card typeE₈RootLattice.DiscriminantGroup = 1 := by
   rw [natCard_discriminantGroup, discriminant_typeE₈RootLattice]
