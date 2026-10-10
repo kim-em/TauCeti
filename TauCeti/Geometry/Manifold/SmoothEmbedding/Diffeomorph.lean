@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Geometry.Diffeomorphism.Group
-public import TauCeti.Geometry.Manifold.Immersion
+public import TauCeti.Geometry.Manifold.Immersion.Basic
 public import TauCeti.Geometry.Manifold.SmoothEmbedding.Basic
 
 /-!
