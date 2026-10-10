@@ -11,7 +11,7 @@ public import TauCeti.Algebra.CentralSimple.Bimodule
 public import TauCeti.Algebra.DirectSum.Internal
 public import TauCeti.Algebra.Module.GradedModule.Opposite
 public import TauCeti.Algebra.Module.GradedModule.TensorProduct
-public import TauCeti.RingTheory.PrimitiveIdempotent
+public import TauCeti.RingTheory.Idempotents.Primitive.Basic
 public import TauCeti.RepresentationTheory.Quiver.Zigzag.Componentwise.Casimir
 public import TauCeti.RepresentationTheory.Quiver.Zigzag.Componentwise.Grading
 
@@ -289,7 +289,8 @@ variable [Finite V]
 /-- **The internal grading of the enveloping algebra** `Z ⊗[k] Zᵐᵒᵖ`: the tensor product of the
 signed path-length grading of `Z` with its transport to `Zᵐᵒᵖ`, so that `x ⊗ op y` has degree
 `deg x + deg y`. -/
-noncomputable def zigzagEnvelopingGrading : InternalGrading k (𝒵ᵉ) :=
+-- The tensor bifunctor and its instances need this category index to reduce to the factor gradings.
+noncomputable abbrev zigzagEnvelopingGrading : InternalGrading k (𝒵ᵉ) :=
   let Γ : InternalGrading k 𝒵 :=
     ⟨zigzagAlgebraIntegerGrade k G, isInternal_zigzagAlgebraIntegerGrade k G⟩
   Γ.tensorProduct Γ.opposite

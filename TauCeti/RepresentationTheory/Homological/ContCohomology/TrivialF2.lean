@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.Algebra.Module.ZMod
 public import Mathlib.Topology.Instances.ZMod
 public import TauCeti.GroupTheory.GroupAction.FixedPoints
 public import TauCeti.RepresentationTheory.Continuous.Restriction
@@ -12,6 +13,7 @@ public import TauCeti.RepresentationTheory.Continuous.TopRep.EqToHom
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Functoriality
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.InnerConjugation
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.SmoothDiscrete.Basic
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Torsion
 public import TauCeti.Topology.Algebra.Group.ContinuousAut.Basic
 
 /-!
@@ -34,8 +36,13 @@ trivial coefficient object for that subgroup.
 
 * `TauCeti.trivialF2`: trivial `𝔽₂` coefficients over an arbitrary
   universe.
+* `TauCeti.cohomF2`: continuous cohomology with trivial `𝔽₂` coefficients, with its canonical
+  `ZMod 2`-module structure `TauCeti.cohomF2.instModule`.
 * `TauCeti.trivialF2ResMap`: restriction on continuous cohomology with trivial `𝔽₂`
   coefficients.
+* `TauCeti.trivialF2CoeffHom`: the identification of the trivial `𝔽₂` coefficients of two
+  monoids, with `TauCeti.trivialF2CoeffHom_smul` its equivariance along a monoid
+  homomorphism.
 * `TauCeti.trivialF2Map`: pullback along any continuous group homomorphism with trivial
   `𝔽₂` coefficients, and `TauCeti.trivialF2Iso` for a topological group isomorphism.
 * `TauCeti.trivialF2QuotientEquivFixedPoints`: trivial `𝔽₂` coefficients on a quotient `G ⧸ N`,
@@ -47,6 +54,8 @@ trivial coefficient object for that subgroup.
 * `TauCeti.trivialF2Equiv`: the additive equivalence that crosses the universe lift, with
   `TauCeti.trivialF2Equiv_cast` its invariance under casts between the carriers of two groups.
 * `TauCeti.trivialF2_ρ_apply_apply`: every monoid element acts trivially.
+* `TauCeti.trivialF2_two_nsmul_eq_zero`, `TauCeti.cohomF2.two_nsmul_eq_zero`: the coefficients,
+  and hence every cohomology class, are killed by `2`.
 * `TauCeti.trivialF2Pairing`: multiplication in `𝔽₂` as a biadditive pairing on the lifted
   carrier, with `TauCeti.trivialF2Pairing_smul_smul` its equivariance.
 * `TauCeti.ofDiscreteModule_trivialF2`: the coefficient dictionary recovers `trivialF2`, with
@@ -185,6 +194,10 @@ theorem trivialF2Pairing_smul_smul (g : G) (x y : (trivialF2 G).V) :
     trivialF2Pairing G (g • x) (g • y) = g • trivialF2Pairing G x y := by
   simp
 
+/-- Every element of the trivial `𝔽₂` coefficient object is killed by `2`. -/
+theorem trivialF2_two_nsmul_eq_zero (x : (trivialF2 G).V) : 2 • x = 0 :=
+  (trivialF2Equiv G).injective (by rw [map_nsmul, map_zero, two_nsmul, CharTwo.add_self_eq_zero])
+
 variable [TopologicalSpace G]
 
 /-- The trivial `𝔽₂` coefficient object is smooth discrete. -/
@@ -220,7 +233,44 @@ theorem trivialF2ResMap_def (S : Subgroup G) (n : ℕ) :
       eqToHom (congrArg (continuousCohomology n) (res_trivialF2 G S)) :=
   (rfl)
 
+/-- Continuous cohomology with trivial `𝔽₂` coefficients, indexed by its degree. It is the
+`ℤ`-coefficient counterpart of `TauCeti.cohomFp`. -/
+noncomputable abbrev cohomF2 (n : ℕ) : Type u :=
+  continuousCohomology n (trivialF2 G)
+
+/-- Every class of continuous cohomology with trivial `𝔽₂` coefficients is killed by `2`. -/
+theorem cohomF2.two_nsmul_eq_zero (n : ℕ) (x : cohomF2 G n) : 2 • x = 0 :=
+  ContinuousCohomology.nsmul_continuousCohomology_eq_zero (trivialF2_two_nsmul_eq_zero G) n x
+
+/-- The canonical `ZMod 2`-module structure on continuous cohomology with trivial `𝔽₂`
+coefficients, which is killed by `2` (`TauCeti.cohomF2.two_nsmul_eq_zero`). -/
+noncomputable instance cohomF2.instModule (n : ℕ) : Module (ZMod 2) (cohomF2 G n) :=
+  AddCommGroup.zmodModule (cohomF2.two_nsmul_eq_zero G n)
+
 end Group
+
+section CoeffHom
+
+variable {G H : Type u} [Monoid G] [Monoid H]
+
+attribute [local instance] TopRep.distribMulAction
+
+/-- The identification of the trivial `𝔽₂` coefficients of `G` with those of `H`. -/
+noncomputable def trivialF2CoeffHom : (trivialF2 G).V →+ (trivialF2 H).V :=
+  ((trivialF2Equiv G).trans (trivialF2Equiv H).symm).toAddMonoidHom
+
+/-- The coefficient identification sends an element to the one with the same underlying value. -/
+@[simp]
+theorem trivialF2CoeffHom_apply (m : (trivialF2 G).V) :
+    trivialF2CoeffHom m = (trivialF2Equiv H).symm (trivialF2Equiv G m) :=
+  (rfl)
+
+/-- The identification `trivialF2CoeffHom` is equivariant along every monoid homomorphism. -/
+theorem trivialF2CoeffHom_smul (φ : H →* G) (h : H) (m : (trivialF2 G).V) :
+    trivialF2CoeffHom (φ h • m) = h • (trivialF2CoeffHom m : (trivialF2 H).V) := by
+  simp only [TopRep.distribMulAction_smul, trivialF2_ρ_apply_apply]
+
+end CoeffHom
 
 section Hom
 
