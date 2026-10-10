@@ -13,7 +13,7 @@ public import TauCeti.RepresentationTheory.CharacterTable.Dixon.Rational.Symmetr
 
 The integer certificate for `S₄` also certifies recovery by the general cyclotomic solver.
 The largest absolute central-character entry is `8`, so every Dixon prime greater than `16`
-has a sufficiently large balanced residue window. Both distinct degree-three rows are retained.
+has a sufficiently large balanced residue window.
 
 `TauCeti.isSome_dixonCyclotomicCharacterTable_symmetricGroupFour` proves success for any such
 prime data, independently of its chosen primitive root. The ordinary table, central table,

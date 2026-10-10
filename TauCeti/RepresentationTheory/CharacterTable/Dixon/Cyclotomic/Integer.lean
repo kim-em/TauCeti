@@ -18,9 +18,8 @@ on the ordinary entries or separate choice of conjugate-row alignments is needed
 
 `TauCeti.ClassData.IsIntegerCharacterTableSpec.isSome_dixonCyclotomicCharacterTable` proves
 success at any Dixon prime large enough for these central entries.
-The existing prime-search API then transfers this criterion to the assembled algorithm.
-The result uses the existing cyclotomic solver and preserves its exact-checker soundness
-guarantees.
+`TauCeti.ClassData.isSome_characterTableDixon?_of_isSome` transfers this criterion to the
+assembled algorithm when the prime search produces the supplied prime data within its budget.
 
 ## References
 
