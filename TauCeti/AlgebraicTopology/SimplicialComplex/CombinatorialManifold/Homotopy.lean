@@ -43,8 +43,8 @@ theorem IsCombinatorialBall.contractibleSpace (h : IsCombinatorialBall P n)
     (hA : P ≤ A.toPreAbstractSimplicialComplex) :
     ContractibleSpace {x : Realization A // x.1.support ∈ P} := by
   obtain ⟨e⟩ := h.nonempty_homeomorph_closedBall hA
-  let := (convex_closedBall (0 : EuclideanSpace ℝ (Fin n)) 1).contractibleSpace
-    (nonempty_closedBall.mpr zero_le_one)
+  let := Metric.contractibleSpace_closedBall
+    (x := (0 : EuclideanSpace ℝ (Fin n))) (r := 1) zero_le_one
   exact e.contractibleSpace
 
 /-- The weak polyhedron of a combinatorial sphere is not contractible, including the
