@@ -22,11 +22,13 @@ rescaled map as `x ↦ A (t • x) x`. This formula still makes sense at `t = 0`
 is jointly `C^n` in `(t, x)`. The result is a smooth isotopy `TauCeti.linearizationIsotopy` from
 `L` to `f` through embeddings, all of which fix the origin.
 
-The isotopy is the step in the proof of the disc theorem that replaces an embedding of `ℝⁿ`
-centred at a point by its derivative there. The disc theorem says that two embeddings of `ℝⁿ` into
-a manifold, sending `0` to the same point, whose derivatives at `0` differ by a linear map of
-positive determinant, are isotopic; after this step, what remains of its proof is that the linear
-maps of positive determinant form a connected group.
+The isotopy supplies the vector-space linearization step in the proof of the disc theorem,
+replacing an embedding of `ℝⁿ` fixing the origin by its derivative there. In this vector-space
+case, connecting the derivatives uses the connectedness of the group of linear maps of positive
+determinant. The general-manifold disc theorem says that two embeddings of `ℝⁿ` into a manifold,
+sending `0` to the same point, whose derivatives at `0` differ by a linear map of positive
+determinant, are isotopic rel `0`. That case also requires shrinking the embeddings into a common
+chart and assembling the isotopy; these steps are not supplied by this construction.
 
 ## Main definitions and results
 
