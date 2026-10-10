@@ -8,7 +8,7 @@ module
 public import TauCeti.RepresentationTheory.Symmetric.Standard
 public import TauCeti.RepresentationTheory.Symmetric.SignCharacter
 public import TauCeti.RepresentationTheory.LinearCharacter.Basic
-import TauCeti.GroupTheory.Perm.FinThree.Basic
+import TauCeti.GroupTheory.Perm.FinThree.Character
 
 /-!
 # The standard representation of S₃ in characteristic three
@@ -67,10 +67,7 @@ noncomputable def standardThreeSignQuotient :
     have hv : v.val.coeff 0 + v.val.coeff 1 + v.val.coeff 2 = 0 := by
       simpa [Fin.sum_univ_succ, add_assoc] using hv
     have h3 : (3 : k) = 0 := CharP.cast_eq_zero k 3
-    have hs : signLinearCharacter k (Fin 3) (finRotate 3) = 1 := by
-      apply Units.ext
-      have h : Equiv.Perm.sign (finRotate 3) = 1 := by decide
-      simp [coe_signLinearCharacter_apply, h]
+    have hs := MonoidHom.apply_finRotate_three (signLinearCharacter k (Fin 3))
     rcases Equiv.Perm.fin_three_cases g with rfl | rfl | rfl | rfl | rfl | rfl <;>
       simp only [LinearMap.coe_comp, LinearMap.sub_apply, Function.comp_apply,
         Finsupp.lapply_apply, LinearEquiv.coe_coe, MonoidAlgebra.coeffLinearEquiv_apply,

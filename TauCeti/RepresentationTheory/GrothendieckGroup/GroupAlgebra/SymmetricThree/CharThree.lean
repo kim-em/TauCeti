@@ -38,38 +38,42 @@ theorem fdRepK0RingEquiv_of_standard_perm_fin_three_char_three :
       (ExactK0.of (FDRep.of (standardRepresentation k (Fin 3)))) =
       1 + fdRepK0RingEquiv k (Equiv.Perm (Fin 3))
         (ExactK0.of (FDRep.ofLinearCharacter (signLinearCharacter k (Fin 3)))) := by
-  let : Module.Finite k[Equiv.Perm (Fin 3)]
-      (standardRepresentation k (Fin 3)).asModule :=
+  let ρ₁ := Representation.trivial k (Equiv.Perm (Fin 3)) k
+  let ρ₂ := standardRepresentation k (Fin 3)
+  let ρ₃ := Representation.ofLinearCharacter (signLinearCharacter k (Fin 3))
+  let : Module.Finite k[Equiv.Perm (Fin 3)] ρ₂.asModule :=
     Module.Finite.of_restrictScalars_finite k k[Equiv.Perm (Fin 3)] _
-  let : Module.Finite k[Equiv.Perm (Fin 3)]
-      (Representation.trivial k (Equiv.Perm (Fin 3)) k).asModule :=
+  let : Module.Finite k[Equiv.Perm (Fin 3)] ρ₁.asModule :=
     Module.Finite.of_restrictScalars_finite k k[Equiv.Perm (Fin 3)] _
-  let : Module.Finite k[Equiv.Perm (Fin 3)]
-      (Representation.ofLinearCharacter (signLinearCharacter k (Fin 3))).asModule :=
+  let : Module.Finite k[Equiv.Perm (Fin 3)] ρ₃.asModule :=
     Module.Finite.of_restrictScalars_finite k k[Equiv.Perm (Fin 3)] _
   rw [FDRep.ofLinearCharacter_def, fdRepK0RingEquiv_of, fdRepK0RingEquiv_of,
     exactK0_one_eq_of_trivial]
   simp only [FDRep.of_ρ']
-  have hS := standardThreeSequence_shortExact k
-  let := hS.mono_f
-  let := hS.epi_g
-  apply (finiteModulesExactK0Equiv k[Equiv.Perm (Fin 3)]).injective
-  simp only [map_add, finiteModulesExactK0Equiv_of]
-  have h := ExactK0.of_conflation_fullSubcategory
-    (isExtensionClosed_finiteModules k[Equiv.Perm (Fin 3)])
-    ((ExactStructure.abelian_conflation _).2 (hS.map Rep.toModuleMonoidAlgebra))
-    (by
-      rw [ShortComplex.map_X₁, standardThreeSequence_X₁]
-      exact (ModuleCat.isFG_iff (ModuleCat.of k[Equiv.Perm (Fin 3)]
-        (Representation.trivial k (Equiv.Perm (Fin 3)) k).asModule)).2 inferInstance)
-    (by
-      rw [ShortComplex.map_X₃, standardThreeSequence_X₃]
-      exact (ModuleCat.isFG_iff (ModuleCat.of k[Equiv.Perm (Fin 3)]
-        (Representation.ofLinearCharacter (signLinearCharacter k (Fin 3))).asModule)).2
-        inferInstance)
-  simp only [ShortComplex.map_X₁, ShortComplex.map_X₂, ShortComplex.map_X₃] at h
-  simp only [standardThreeSequence_X₁, standardThreeSequence_X₂, standardThreeSequence_X₃] at h
-  simpa only [Rep.toModuleMonoidAlgebra, Rep.of_ρ, Rep.trivial] using h
+  -- These group-algebra maps preserve the underlying functions of the representation maps.
+  let f : ρ₁.asModule →ₗ[k[Equiv.Perm (Fin 3)]] ρ₂.asModule := by
+    exact _root_.Representation.IntertwiningMap.equivLinearMapAsModule _ _
+      (standardThreeTrivialInclusion k)
+  let g : ρ₂.asModule →ₗ[k[Equiv.Perm (Fin 3)]] ρ₃.asModule := by
+    exact _root_.Representation.IntertwiningMap.equivLinearMapAsModule _ _
+      (standardThreeSignQuotient k)
+  have hfg : Function.Exact f g := by
+    simpa only [f, g, Function.Exact, Set.mem_range,
+      _root_.Representation.IntertwiningMap.equivLinearMapAsModule_apply]
+      using! exact_standardThreeTrivialInclusion_standardThreeSignQuotient k
+  have h := exactK0_of_eq_range_add_range k[Equiv.Perm (Fin 3)]
+    (M := ρ₁.asModule) (N := ρ₂.asModule) (P := ρ₃.asModule) (f := f) (g := g) hfg
+  rw [exactK0_of_range_of_injective k[Equiv.Perm (Fin 3)]
+      (M := ρ₁.asModule) (N := ρ₂.asModule) (f := f) (by
+      simpa only [f, Function.Injective,
+        _root_.Representation.IntertwiningMap.equivLinearMapAsModule_apply]
+        using! standardThreeTrivialInclusion_injective k),
+    exactK0_of_range_of_surjective k[Equiv.Perm (Fin 3)]
+      (M := ρ₂.asModule) (N := ρ₃.asModule) (f := g) (by
+      simpa only [g, Function.Surjective,
+        _root_.Representation.IntertwiningMap.equivLinearMapAsModule_apply]
+        using! standardThreeSignQuotient_surjective k)] at h
+  exact h
 
 /-- The three-point permutation module of S₃ has two trivial factors and one sign factor. -/
 theorem permK0_fin_three_char_three :
@@ -77,33 +81,48 @@ theorem permK0_fin_three_char_three :
       2 • (1 : ExactK0 (finiteModulesExactStructure k[Equiv.Perm (Fin 3)])) +
         fdRepK0RingEquiv k (Equiv.Perm (Fin 3))
           (ExactK0.of (FDRep.ofLinearCharacter (signLinearCharacter k (Fin 3)))) := by
+  let ρ₁ := (augmentationSubrepresentation k (Equiv.Perm (Fin 3)) (Fin 3)).toRepresentation
+  let ρ₂ := Representation.ofMulAction k (Equiv.Perm (Fin 3)) (Fin 3)
+  let ρ₃ := Representation.trivial k (Equiv.Perm (Fin 3)) k
   have hS := permutationAugmentationSequence_shortExact k (Equiv.Perm (Fin 3)) (Fin 3)
   rw [permutationAugmentationSequence_def] at hS
-  let := hS.mono_f
-  let := hS.epi_g
-  let : Module.Finite k[Equiv.Perm (Fin 3)]
-      (Representation.trivial k (Equiv.Perm (Fin 3)) k).asModule :=
+  let : Module.Finite k[Equiv.Perm (Fin 3)] ρ₃.asModule :=
     Module.Finite.of_restrictScalars_finite k k[Equiv.Perm (Fin 3)] _
-  let : Module.Finite k[Equiv.Perm (Fin 3)]
-      (augmentationSubrepresentation k (Equiv.Perm (Fin 3)) (Fin 3)).toRepresentation.asModule :=
+  let : Module.Finite k[Equiv.Perm (Fin 3)] ρ₁.asModule :=
     Module.Finite.of_restrictScalars_finite k k[Equiv.Perm (Fin 3)] _
-  have h := ExactK0.of_conflation_fullSubcategory
-    (isExtensionClosed_finiteModules k[Equiv.Perm (Fin 3)])
-    ((ExactStructure.abelian_conflation _).2 (hS.map Rep.toModuleMonoidAlgebra))
-    (by exact (ModuleCat.isFG_iff (ModuleCat.of k[Equiv.Perm (Fin 3)]
-      (augmentationSubrepresentation k (Equiv.Perm (Fin 3))
-        (Fin 3)).toRepresentation.asModule)).2 inferInstance)
-    (by exact (ModuleCat.isFG_iff (ModuleCat.of k[Equiv.Perm (Fin 3)]
-      (Representation.trivial k (Equiv.Perm (Fin 3)) k).asModule)).2 inferInstance)
+  let : Module.Finite k[Equiv.Perm (Fin 3)] ρ₂.asModule :=
+    Module.Finite.of_restrictScalars_finite k k[Equiv.Perm (Fin 3)] _
+  -- These group-algebra maps preserve the underlying functions of the representation maps.
+  let f : ρ₁.asModule →ₗ[k[Equiv.Perm (Fin 3)]] ρ₂.asModule := by
+    exact _root_.Representation.IntertwiningMap.equivLinearMapAsModule _ _
+      (augmentationSubrepresentation k (Equiv.Perm (Fin 3)) (Fin 3)).subtype
+  let g : ρ₂.asModule →ₗ[k[Equiv.Perm (Fin 3)]] ρ₃.asModule := by
+    exact _root_.Representation.IntertwiningMap.equivLinearMapAsModule _ _
+      (permutationAugmentation k (Equiv.Perm (Fin 3)) (Fin 3)).hom
   have hc : permK0 k (Equiv.Perm (Fin 3)) (Fin 3) =
       fdRepK0RingEquiv k (Equiv.Perm (Fin 3))
         (ExactK0.of (FDRep.of (standardRepresentation k (Fin 3)))) + 1 := by
     rw [permK0_def, fdRepK0RingEquiv_of, FDRep.of_ρ', exactK0_one_eq_of_trivial]
     rw [← toRepresentation_augmentationSubrepresentation]
-    apply (finiteModulesExactK0Equiv k[Equiv.Perm (Fin 3)]).injective
-    simp only [map_add, finiteModulesExactK0Equiv_of]
-    simpa only [ShortComplex.map_X₁, ShortComplex.map_X₂, ShortComplex.map_X₃,
-      Rep.toModuleMonoidAlgebra, Rep.of_ρ, Rep.trivial] using h
+    have hfg : Function.Exact f g := by
+      simpa only [f, g, Function.Exact, Set.mem_range,
+        _root_.Representation.IntertwiningMap.equivLinearMapAsModule_apply, Rep.ofHom_hom]
+        using! (Rep.exact_iff_function_exact _).1 hS.exact
+    have h := exactK0_of_eq_range_add_range k[Equiv.Perm (Fin 3)]
+      (M := ρ₁.asModule) (N := ρ₂.asModule) (P := ρ₃.asModule) (f := f) (g := g) hfg
+    rw [exactK0_of_range_of_injective k[Equiv.Perm (Fin 3)]
+        (M := ρ₁.asModule)
+        (N := ρ₂.asModule) (f := f) (by
+        simpa only [f, Function.Injective,
+          _root_.Representation.IntertwiningMap.equivLinearMapAsModule_apply, Rep.ofHom_hom]
+          using! (Rep.mono_iff_injective _).1 hS.mono_f),
+      exactK0_of_range_of_surjective k[Equiv.Perm (Fin 3)]
+        (M := ρ₂.asModule)
+        (N := ρ₃.asModule) (f := g) (by
+        simpa only [g, Function.Surjective,
+          _root_.Representation.IntertwiningMap.equivLinearMapAsModule_apply, Rep.ofHom_hom]
+          using! (Rep.epi_iff_surjective _).1 hS.epi_g)] at h
+    exact h
   rw [hc, fdRepK0RingEquiv_of_standard_perm_fin_three_char_three]
   simp only [two_nsmul]
   abel
