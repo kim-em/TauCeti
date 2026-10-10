@@ -18,8 +18,7 @@ isometry. The metric argument uses tangent vectors supported in just one factor.
 
 Thus an argument establishing separation of the underlying function suffices to identify
 an isometry of a product geometry as an element of the product of its factor isometry
-groups. In particular this is the last packaging step after differential separation for
-products with distinct Ricci eigenspaces.
+groups.
 
 ## References
 
@@ -71,29 +70,27 @@ theorem exists_prodCongr_of_eq_prodMap
   have hinnerφ : ∀ x (v w : TangentSpace I x),
       inner ℝ (mfderiv I I' φ x v) (mfderiv I I' φ x w) = inner ℝ v w := by
     intro x v w
-    have h := Q.inner_mfderiv (x, y₀) (v, 0) (w, 0)
-    rw [hsep, mfderiv_prodMap (φ.mdifferentiable (by simp) x)
-      (ψ.mdifferentiable (by simp) y₀)] at h
-    -- `erw` identifies the transported instances on product tangent spaces.
-    repeat erw [Manifold.inner_tangentSpace_prod] at h
-    repeat erw [Manifold.tangentSpaceProdEquiv_apply] at h
-    erw [ContinuousLinearMap.coe_prodMap'] at h
-    simp only [Prod.map] at h
-    erw [map_zero, inner_zero_left, inner_zero_left] at h
-    simpa only [add_zero, zero_add] using h
+    have h := Q.inner_mfderiv (x, y₀)
+      ((Manifold.tangentSpaceProdEquiv (x, y₀)).symm (v, 0))
+      ((Manifold.tangentSpaceProdEquiv (x, y₀)).symm (w, 0))
+    rw [Manifold.inner_tangentSpace_prod, Manifold.inner_tangentSpace_prod_mk_zero] at h
+    rw [hsep] at h
+    simp only [Manifold.mfderiv_prodMap_apply (p := (x, y₀)) (φ.mdifferentiable (by simp) x)
+      (ψ.mdifferentiable (by simp) y₀), Prod.map, ContinuousLinearEquiv.apply_symm_apply,
+      map_zero, inner_zero_left, add_zero] at h
+    exact h
   have hinnerψ : ∀ y (v w : TangentSpace J y),
       inner ℝ (mfderiv J J' ψ y v) (mfderiv J J' ψ y w) = inner ℝ v w := by
     intro y v w
-    have h := Q.inner_mfderiv (x₀, y) (0, v) (0, w)
-    rw [hsep, mfderiv_prodMap (φ.mdifferentiable (by simp) x₀)
-      (ψ.mdifferentiable (by simp) y)] at h
-    -- `erw` identifies the transported instances on product tangent spaces.
-    repeat erw [Manifold.inner_tangentSpace_prod] at h
-    repeat erw [Manifold.tangentSpaceProdEquiv_apply] at h
-    erw [ContinuousLinearMap.coe_prodMap'] at h
-    simp only [Prod.map] at h
-    erw [map_zero, inner_zero_left, inner_zero_left] at h
-    simpa only [add_zero, zero_add] using h
+    have h := Q.inner_mfderiv (x₀, y)
+      ((Manifold.tangentSpaceProdEquiv (x₀, y)).symm (0, v))
+      ((Manifold.tangentSpaceProdEquiv (x₀, y)).symm (0, w))
+    rw [Manifold.inner_tangentSpace_prod, Manifold.inner_tangentSpace_prod_zero_mk] at h
+    rw [hsep] at h
+    simp only [Manifold.mfderiv_prodMap_apply (p := (x₀, y)) (φ.mdifferentiable (by simp) x₀)
+      (ψ.mdifferentiable (by simp) y), Prod.map, ContinuousLinearEquiv.apply_symm_apply,
+      map_zero, inner_zero_left, zero_add] at h
+    exact h
   let Φ : RiemannianIsometry I I' M M' := ⟨φ, hinnerφ⟩
   let Ψ : RiemannianIsometry J J' N N' := ⟨ψ, hinnerψ⟩
   have hΦ : ⇑Φ = φ := (coe_toDiffeomorph Φ).symm
