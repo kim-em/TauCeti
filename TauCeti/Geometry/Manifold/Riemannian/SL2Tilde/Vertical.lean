@@ -97,20 +97,25 @@ private theorem vertical_derivative_sign_constant (Φ : Isom J SL2Tilde) (p : P)
   exact ((isPreconnected_range ha).isDiscrete_iff_subsingleton.mp hfinite.isDiscrete)
     (mem_range_self p) (mem_range_self 0)
 
-/-- The differential of an isometry sends the unit vertical vector to `ε` times the
-unit vertical vector, for a single sign `ε = ±1` independent of the point. -/
+/-- The differential of an isometry multiplies every vertical vector by a single
+sign `ε = ±1` independent of the point and the vector. -/
 theorem exists_mfderiv_vertical_eq (Φ : Isom J SL2Tilde) :
-    ∃ ε : ℝ, (ε = 1 ∨ ε = -1) ∧ ∀ p : SL2Tilde,
-      tangentSpaceCastModel J (Φ p) (mfderiv J J Φ p (constantField (0, 0, 1) p)) =
-        (0, 0, ε) := by
+    ∃ ε : ℝ, (ε = 1 ∨ ε = -1) ∧ ∀ (p : SL2Tilde) (r : ℝ),
+      tangentSpaceCastModel J (Φ p) (mfderiv J J Φ p (constantField (0, 0, r) p)) =
+        (0, 0, ε * r) := by
   refine ⟨(fderiv ℝ (coordinateMap Φ) 0 (0, 0, 1)).2.2,
     (vertical_derivative_sign Φ 0).2.2, ?_⟩
-  intro p
+  intro p r
   rw [← coordinate_derivative]
   simp only [constantField_apply, ContinuousLinearEquiv.apply_symm_apply]
-  exact Prod.ext (vertical_derivative_sign Φ (toProd p)).1
-    (Prod.ext (vertical_derivative_sign Φ (toProd p)).2.1
-      (vertical_derivative_sign_constant Φ (toProd p)))
+  have hunit : fderiv ℝ (coordinateMap Φ) (toProd p) (0, 0, 1) =
+      (0, 0, (fderiv ℝ (coordinateMap Φ) 0 (0, 0, 1)).2.2) :=
+    Prod.ext (vertical_derivative_sign Φ (toProd p)).1
+      (Prod.ext (vertical_derivative_sign Φ (toProd p)).2.1
+        (vertical_derivative_sign_constant Φ (toProd p)))
+  have hr : (0, 0, r) = r • ((0, 0, 1) : P) := by simp
+  rw [hr, map_smul, hunit]
+  simp [mul_comm]
 
 /-- Every isometry preserves vertical fibres, either preserving their parameter
 orientation everywhere or reversing it everywhere. The formula includes the translation
@@ -125,10 +130,10 @@ theorem exists_apply_vertical_eq (Φ : Isom J SL2Tilde) :
     simpa [c] using (hasDerivAt_const t p.x).prodMk
       ((hasDerivAt_const t p.y).prodMk ((hasDerivAt_id t).const_add p.z))
   have hf (t : ℝ) : HasDerivAt (coordinateMap Φ ∘ c) (0, 0, ε) t := by
-    have h := hd (toProd.symm (c t))
+    have h := hd (toProd.symm (c t)) 1
     rw [← coordinate_derivative] at h
     simp only [constantField_apply, ContinuousLinearEquiv.apply_symm_apply,
-      Equiv.apply_symm_apply] at h
+      Equiv.apply_symm_apply, mul_one] at h
     simpa only [h] using
       ((contDiff_coordinateMap Φ).differentiable (by simp) (c t)).hasFDerivAt.comp_hasDerivAt
         t (hc t)
@@ -155,7 +160,7 @@ theorem exists_apply_vertical_eq (Φ : Isom J SL2Tilde) :
 /-- The image of a whole vertical fibre is the whole fibre through the image of any
 one of its points, including for isometries that reverse the fibre orientation. -/
 @[simp]
-theorem image_verticalFiber (Φ : Isom J SL2Tilde) (p : SL2Tilde) :
+theorem image_vertical_fiber (Φ : Isom J SL2Tilde) (p : SL2Tilde) :
     Φ '' {q : SL2Tilde | q.x = p.x ∧ q.y = p.y} =
       {q : SL2Tilde | q.x = (Φ p).x ∧ q.y = (Φ p).y} := by
   obtain ⟨ε, hε, hΦ⟩ := exists_apply_vertical_eq Φ
