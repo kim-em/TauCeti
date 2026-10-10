@@ -66,6 +66,7 @@ theorem starProjection_peterWeylBlock_apply_eq_integral (h : IsIrrepSkeleton mod
 
 /-- A vector lies in the selected algebraic isotypic component of the left regular
 representation exactly when its strong character average fixes it. -/
+@[simp]
 theorem mem_isotypicComponent_iff_integral_isotypicKernel (h : IsIrrepSkeleton models)
     (i : ι) (f : Lp 𝕜 2 (haarProb G)) :
     f ∈ isotypicComponent 𝕜[G] (leftRegularLp 𝕜 G).toRepresentation.asModule

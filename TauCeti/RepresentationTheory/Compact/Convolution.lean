@@ -7,12 +7,10 @@ module
 
 public import TauCeti.RepresentationTheory.Compact.Averaging
 public import Mathlib.MeasureTheory.Function.ContinuousMapDense
-public import Mathlib.MeasureTheory.Function.L2Space
 public import Mathlib.Analysis.InnerProductSpace.Spectrum
 public import Mathlib.Topology.ContinuousMap.Bounded.ArzelaAscoli
 public import TauCeti.RepresentationTheory.Compact.RegularRepresentation
 import TauCeti.RepresentationTheory.Continuous.Integrated.Basic
-import TauCeti.MeasureTheory.Function.Lp.CompMeasurePreservingEquiv
 
 /-!
 # Convolution operators on `L²` of a compact group
