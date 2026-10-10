@@ -7,6 +7,7 @@ module
 
 public import Mathlib.LinearAlgebra.Eigenspace.Pi
 public import TauCeti.Algebra.Lie.Presentation.Serre
+public import TauCeti.Algebra.Lie.Weights.Eigenvector
 
 /-!
 # The adjoint representation of a Serre system is integrable
@@ -50,8 +51,6 @@ the presented algebra, and the weight decomposition is what they permute.
   `TauCeti.IsSerreSystem.isInternal_iInf_eigenspace_ad`: over a characteristic-zero domain, the
   integral simultaneous eigenspaces are independent, and the Lie algebra is their internal direct
   sum.
-* `TauCeti.lieSpan_serreE_union_serreF_eq_top`: the raising and lowering generators of
-  `Matrix.ToLieAlgebra R CM` generate it.
 * `TauCeti.engel_serreE_eq_top`, `TauCeti.engel_serreF_eq_top`,
   `TauCeti.iSup_iInf_eigenspace_ad_serreH_eq_top` and
   `TauCeti.isInternal_iInf_eigenspace_ad_serreH`: the same statements for the generators of
@@ -79,10 +78,6 @@ namespace IsSerreSystem
 /-! ## Local nilpotence of the raising and lowering generators -/
 
 section Engel
-
-private theorem ad_pow_succ_apply (x y : L) (n : ℕ) :
-    (ad R L x ^ (n + 1)) y = (ad R L x ^ n) ⁅x, y⁆ := by
-  rw [pow_succ, Module.End.mul_apply, ad_apply]
 
 variable (h : IsSerreSystem R CM H E F)
 include h
@@ -136,33 +131,6 @@ end Engel
 /-! ## The integral weight decomposition -/
 
 section Weights
-
-/-- The bracket of a simultaneous eigenvector of the `ad Hᵢ` of eigenvalues `χ` with one of
-eigenvalues `ψ` is a simultaneous eigenvector of eigenvalues `χ + ψ`, by the Leibniz rule. -/
-private theorem lie_mem_iInf_eigenspace_ad {χ ψ : B → R} {x y : L}
-    (hx : x ∈ ⨅ i, (ad R L (H i)).eigenspace (χ i))
-    (hy : y ∈ ⨅ i, (ad R L (H i)).eigenspace (ψ i)) :
-    ⁅x, y⁆ ∈ ⨅ i, (ad R L (H i)).eigenspace (χ i + ψ i) := by
-  simp only [Submodule.mem_iInf, Module.End.mem_eigenspace_iff, ad_apply] at hx hy ⊢
-  intro i
-  rw [leibniz_lie, hx i, hy i, smul_lie, lie_smul, add_smul]
-
-/-- The sum of the simultaneous eigenspaces of the `ad Hᵢ` with integral eigenvalues is closed
-under the bracket, since the bracket adds eigenvalues. -/
-private theorem lie_mem_iSup_iInf_eigenspace_ad {x y : L}
-    (hx : x ∈ ⨆ χ : B → ℤ, ⨅ i, (ad R L (H i)).eigenspace (χ i : R))
-    (hy : y ∈ ⨆ χ : B → ℤ, ⨅ i, (ad R L (H i)).eigenspace (χ i : R)) :
-    ⁅x, y⁆ ∈ ⨆ χ : B → ℤ, ⨅ i, (ad R L (H i)).eigenspace (χ i : R) := by
-  induction hx using Submodule.iSup_induction' with
-  | mem χ x hx =>
-    induction hy using Submodule.iSup_induction' with
-    | mem ψ y hy =>
-      refine Submodule.mem_iSup_of_mem (χ + ψ) ?_
-      simpa only [Pi.add_apply, Int.cast_add] using lie_mem_iInf_eigenspace_ad hx hy
-    | zero => simp
-    | add y₁ y₂ _ _ h₁ h₂ => rw [lie_add]; exact add_mem h₁ h₂
-  | zero => simp
-  | add x₁ x₂ _ _ h₁ h₂ => rw [add_lie]; exact add_mem h₁ h₂
 
 variable (R H) in
 /-- The sum of the simultaneous eigenspaces of the `ad Hᵢ` with integral eigenvalues, as a Lie
@@ -226,19 +194,6 @@ end IsSerreSystem
 section Presented
 
 variable [DecidableEq B] (R CM)
-
-/-- The raising and lowering generators of `Matrix.ToLieAlgebra R CM` generate it: the Cartan
-generators are their brackets `Hᵢ = ⁅Eᵢ, Fᵢ⁆`. -/
-theorem lieSpan_serreE_union_serreF_eq_top :
-    LieSubalgebra.lieSpan R (Matrix.ToLieAlgebra R CM)
-      (Set.range (serreE R CM) ∪ Set.range (serreF R CM)) = ⊤ := by
-  rw [eq_top_iff, ← lieSpan_serreGenerators_eq_top R CM, LieSubalgebra.lieSpan_le]
-  rintro _ ((⟨i, rfl⟩ | ⟨i, rfl⟩) | ⟨i, rfl⟩)
-  · rw [← lie_serreE_serreF_self R CM i]
-    exact LieSubalgebra.lie_mem _ (LieSubalgebra.subset_lieSpan (Or.inl ⟨i, rfl⟩))
-      (LieSubalgebra.subset_lieSpan (Or.inr ⟨i, rfl⟩))
-  · exact LieSubalgebra.subset_lieSpan (Or.inl ⟨i, rfl⟩)
-  · exact LieSubalgebra.subset_lieSpan (Or.inr ⟨i, rfl⟩)
 
 /-- In the Lie algebra presented by Serre's relations, `ad Eᵢ` is locally nilpotent. -/
 theorem engel_serreE_eq_top (i : B) : LieSubalgebra.engel R (serreE R CM i) = ⊤ :=
