@@ -39,7 +39,7 @@ local instance : NeZero (2 : k) := NeZero.of_not_dvd k (by decide : ¬3 ∣ 2)
 in characteristic three: the trivial line and the sign line. -/
 -- Simplify before the basis-vector class formulas expand the argument.
 @[simp↓]
-theorem resK0_stabilizer_perm_fin_three_simpleClassBasis (b : Bool) :
+theorem resK0_stabilizer_perm_fin_three_simpleClassBasis_apply (b : Bool) :
     resK0 k (MulAction.stabilizer (Equiv.Perm (Fin 3)) a).subtype
         (symmetricThreeCharThreeSimpleClassBasis k b) =
       symmetricThreeStabilizerSimpleClassBasis k a b := by
@@ -56,7 +56,7 @@ private theorem resK0_eq_basisEquiv :
   intro b
   simpa only [AddMonoidHom.coe_toIntLinearMap, LinearEquiv.coe_coe,
     Module.Basis.equiv_apply, Equiv.refl_apply] using
-    resK0_stabilizer_perm_fin_three_simpleClassBasis k a b
+    resK0_stabilizer_perm_fin_three_simpleClassBasis_apply k a b
 
 /-- Restriction preserves the integral composition coordinates, ordered as trivial and sign.
 In particular either multiplicity can be computed on the restricted representation. -/
@@ -72,7 +72,7 @@ theorem symmetricThreeStabilizerSimpleClassBasis_repr_resK0
     apply (symmetricThreeCharThreeSimpleClassBasis k).ext
     intro b
     simp only [LinearMap.comp_apply, LinearEquiv.coe_coe,
-      AddMonoidHom.coe_toIntLinearMap, resK0_stabilizer_perm_fin_three_simpleClassBasis,
+      AddMonoidHom.coe_toIntLinearMap, resK0_stabilizer_perm_fin_three_simpleClassBasis_apply,
       Module.Basis.repr_self]
   exact DFunLike.congr_fun h x
 
