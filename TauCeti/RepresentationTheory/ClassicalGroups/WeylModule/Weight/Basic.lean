@@ -308,8 +308,9 @@ end YoungTableau
 variable {k : Type u} {n : ℕ}
 
 variable (k) (n) in
-/-- The integer weight spaces of a Weyl module form an internal direct sum. -/
-theorem isInternal_weightSpace_weylRepOfShape [Field k] [CharZero k] (μ : YoungDiagram) :
+/-- Over a field that is a `ℚ`-algebra, the integer weight spaces of a Weyl module form an
+internal direct sum. The rational algebra structure is required to define the Weyl module. -/
+theorem isInternal_weightSpace_weylRepOfShape [Field k] [Algebra ℚ k] (μ : YoungDiagram) :
     DirectSum.IsInternal fun l : Fin n → ℤ =>
       weightSpace (W := (weylModuleOfShape k n μ).toSubmodule) (weylRepOfShape k n μ) l := by
   classical
@@ -334,7 +335,7 @@ theorem isInternal_weightSpace_weylRepOfShape [Field k] [CharZero k] (μ : Young
       simpa only [weylModuleOfShape_toSubmodule] using w.property
     obtain ⟨v, hv⟩ := hw
     exact ⟨v, Subtype.ext hv⟩
-  exact isInternal_weightSpace_of_iSup_eq_top weightChar_injective
+  exact isInternal_weightSpace_of_iSup_eq_top (weightChar_injective_of_algebraRat k)
     (q.iSup_weightSpace_eq_top_of_surjective hq iSup_weightSpace_tensorPowerRep_eq_top)
 
 /-- A shape-indexed Weyl weight space vanishes exactly when the corresponding weight space for
