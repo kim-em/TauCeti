@@ -153,6 +153,17 @@ theorem isClosed_normalDiscBundleOfRadius (hf : ContMDiff I 𝓘(ℝ, V) 1 f)
   (isClosed_setOf_mem_normalSubspace hf).inter
     (isClosed_le (continuous_norm.comp continuous_snd) (hr.comp continuous_fst))
 
+/-- Continuous variable-radius closed normal discs over a compact manifold are compact
+when the ambient inner product space is proper. -/
+theorem isCompact_normalDiscBundleOfRadius [ProperSpace V] [CompactSpace M]
+    (hf : ContMDiff I 𝓘(ℝ, V) 1 f) (hr : Continuous r) :
+    IsCompact (normalDiscBundleOfRadius I f r) := by
+  obtain ⟨R, hR⟩ := (isCompact_range hr).bddAbove
+  apply (isCompact_univ.prod (isCompact_closedBall (0 : V) R)).of_isClosed_subset
+    (isClosed_normalDiscBundleOfRadius hf hr)
+  exact fun p hp => ⟨mem_univ _, mem_closedBall_zero_iff.mpr
+    ((mem_normalDiscBundleOfRadius.mp hp).2.trans (hR (mem_range_self p.1)))⟩
+
 /-- Continuous variable-radius normal spheres are closed in the ambient product. -/
 theorem isClosed_normalSphereBundleOfRadius (hf : ContMDiff I 𝓘(ℝ, V) 1 f)
     (hr : Continuous r) : IsClosed (normalSphereBundleOfRadius I f r) :=
