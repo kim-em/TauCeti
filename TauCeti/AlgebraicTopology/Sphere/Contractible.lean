@@ -17,8 +17,8 @@ This distinguishes spherical links from ball links, including the two-point zero
 No inner product on the normed space is required: the reduced homology computation is
 transported from a Euclidean space of the same dimension.
 
-The proof uses `reducedSingularHomologySphereIsoOfFinrankEq` and
-`reducedSingularHomologySphereIso`, with integer coefficients. See Hatcher,
+The sphere has nonzero reduced singular homology with integer coefficients in its
+dimension, whereas a contractible space has zero reduced homology in every degree. See Hatcher,
 *Algebraic Topology*, Section 2.1, Corollary 2.14, for the homology obstruction to
 contractibility of spheres.
 -/
