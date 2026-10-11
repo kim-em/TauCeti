@@ -39,7 +39,8 @@ Nothing here assumes that `CM` is a Cartan matrix. Integrability of the adjoint 
 the first step of Serre's theorem identifying `Matrix.ToLieAlgebra K CM`, for a Cartan matrix `CM`
 over a field `K` of characteristic zero, with the finite-dimensional split semisimple Lie algebra
 of that Cartan matrix: local nilpotence is what makes `exp (ad Eᵢ)` and `exp (ad Fᵢ)` defined on
-the presented algebra, and the weight decomposition is what they permute.
+the presented algebra. Suitable composites of these exponentials implement simple reflections and
+permute the weight spaces.
 
 ## Main results
 
