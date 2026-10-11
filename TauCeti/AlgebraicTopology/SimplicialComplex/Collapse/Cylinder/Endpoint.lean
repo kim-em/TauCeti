@@ -149,7 +149,7 @@ private theorem collapsesTo_trimmedCylinder_empty (K : PreAbstractSimplicialComp
 
 /-- The staircase cylinder of a finite complex collapses onto its terminal endpoint copy.
 The ambient vertex type can be infinite; only the face set is required to be finite. -/
-theorem collapsesTo_orderedProd_interval_endpoint (K : PreAbstractSimplicialComplex ι)
+theorem collapsesTo_orderedProd_interval_one (K : PreAbstractSimplicialComplex ι)
     (hfin : K.faces.Finite) :
     CollapsesTo (orderedProd K (⊤ : PreAbstractSimplicialComplex (Fin 2)))
       (K.map (fun a => (a, (1 : Fin 2)))) := by
@@ -166,11 +166,11 @@ theorem collapsesTo_orderedProd_interval_endpoint (K : PreAbstractSimplicialComp
   rw [← hR, ← trimmedCylinder_empty]
   exact collapsesTo_trimmedCylinder_empty K hfin R
 
-/-- Taking a staircase cylinder preserves collapsibility of any finite complex. -/
+/-- Taking a staircase cylinder preserves collapsibility. -/
 theorem Collapsible.orderedProd_interval {K : PreAbstractSimplicialComplex ι}
-    (h : Collapsible K) (hfin : K.faces.Finite) :
+    (h : Collapsible K) :
     Collapsible (orderedProd K (⊤ : PreAbstractSimplicialComplex (Fin 2))) := by
-  apply Collapsible.of_collapsesTo (collapsesTo_orderedProd_interval_endpoint K hfin)
+  apply Collapsible.of_collapsesTo (collapsesTo_orderedProd_interval_one K h.finite_faces)
   exact (Collapsible.map_iff_of_injective (fun a => (a, (1 : Fin 2)))
     (fun _ _ h => congrArg Prod.fst h)).mpr h
 
@@ -181,21 +181,20 @@ namespace AbstractSimplicialComplex
 variable {ι : Type*} [LinearOrder ι]
 
 /-- A finite ordered cylinder collapses onto the copy of its base at time one. -/
-theorem collapsesTo_orderedCylinder_endpoint (K : AbstractSimplicialComplex ι)
+theorem collapsesTo_orderedCylinder_one (K : AbstractSimplicialComplex ι)
     (hfin : K.faces.Finite) :
     PreAbstractSimplicialComplex.CollapsesTo K.orderedCylinder.toPreAbstractSimplicialComplex
       (K.toPreAbstractSimplicialComplex.map (fun a => (a, (1 : Fin 2)))) := by
   rw [orderedCylinder_toPreAbstractSimplicialComplex]
-  exact PreAbstractSimplicialComplex.collapsesTo_orderedProd_interval_endpoint
+  exact PreAbstractSimplicialComplex.collapsesTo_orderedProd_interval_one
     K.toPreAbstractSimplicialComplex hfin
 
-/-- The ordered cylinder of a finite collapsible complex is collapsible. This supplies the
+/-- The ordered cylinder of a collapsible complex is collapsible. This supplies the
 collapsible-base case of the cylinder collapsibility problem. -/
 theorem collapsible_orderedCylinder_of_collapsible (K : AbstractSimplicialComplex ι)
-    (hfin : K.faces.Finite)
     (h : PreAbstractSimplicialComplex.Collapsible K.toPreAbstractSimplicialComplex) :
     PreAbstractSimplicialComplex.Collapsible K.orderedCylinder.toPreAbstractSimplicialComplex := by
   rw [orderedCylinder_toPreAbstractSimplicialComplex]
-  exact h.orderedProd_interval hfin
+  exact h.orderedProd_interval
 
 end AbstractSimplicialComplex

@@ -61,9 +61,10 @@ private theorem collapsesTo_deletion_vertex_aux (v w : ι) (hwv : w ≠ v) :
         ⟨v, Finset.mem_erase.mpr ⟨hwv.symm, hvρ⟩⟩
     let S : Set (Finset ι) := {σ | σ ∈ K ∧ v ∈ σ ∧ w ∉ σ}
     have hS : S.Finite := hfin.subset (fun _ h => ⟨h.1, h.2.1⟩)
-    obtain ⟨σ, _, hmax⟩ := hS.exists_le_maximal
-      (show ρ.erase w ∈ S from
-        ⟨hρerase, Finset.mem_erase.mpr ⟨hwv.symm, hvρ⟩, Finset.notMem_erase _ _⟩)
+    have hρS : ρ.erase w ∈ S := by
+      dsimp [S]
+      exact ⟨hρerase, Finset.mem_erase.mpr ⟨hwv.symm, hvρ⟩, Finset.notMem_erase _ _⟩
+    obtain ⟨σ, _, hmax⟩ := hS.exists_le_maximal hρS
     have hσ : σ ∈ K := hmax.prop.1
     have hvσ : v ∈ σ := hmax.prop.2.1
     have hwσ : w ∉ σ := hmax.prop.2.2
@@ -76,8 +77,10 @@ private theorem collapsesTo_deletion_vertex_aux (v w : ι) (hwv : w ≠ v) :
         have hmem : τ.erase w ∈ K :=
           (K.isRelLowerSet_faces hτ).2 (Finset.erase_subset _ _)
             ⟨v, hsub hvσ⟩
-        have heq := hmax.eq_of_ge
-          (show τ.erase w ∈ S from ⟨hmem, hsub hvσ, Finset.notMem_erase _ _⟩) hsub
+        have hτS : τ.erase w ∈ S := by
+          dsimp [S]
+          exact ⟨hmem, hsub hvσ, Finset.notMem_erase _ _⟩
+        have heq := hmax.eq_of_ge hτS hsub
         exact Or.inr (by rw [← heq, Finset.insert_erase hwτ])
       · exact Or.inl (hmax.eq_of_ge ⟨hτ, hστ hvσ, hwτ⟩ hστ)
     have hstep : ElementaryCollapsesTo K (deletion K σ) :=
@@ -89,7 +92,12 @@ private theorem collapsesTo_deletion_vertex_aux (v w : ι) (hwv : w ≠ v) :
       have hstrict : T ⊂ {τ : Finset ι | τ ∈ K ∧ v ∈ τ} := by
         refine Set.ssubset_iff_subset_ne.mpr ⟨fun _ h => ⟨deletion_le h.1, h.2⟩, ?_⟩
         intro heq
-        have hσT : σ ∈ T := heq.symm ▸ (show σ ∈ {τ | τ ∈ K ∧ v ∈ τ} from ⟨hσ, hvσ⟩)
+        have hσincident : σ ∈ {τ : Finset ι | τ ∈ K ∧ v ∈ τ} := by
+          simp only [Set.mem_ofPred_eq]
+          exact ⟨hσ, hvσ⟩
+        have hσT : σ ∈ T := by
+          rw [heq]
+          exact hσincident
         exact (mem_deletion.mp hσT.1).2 Finset.Subset.rfl
       exact (Set.ncard_lt_ncard hstrict hfin).trans_le hcard
     -- Domination survives deletion, and the terminal vertex-deletion complex is unchanged.
