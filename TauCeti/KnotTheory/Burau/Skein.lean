@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.KnotTheory.Burau.Normalization
-public import TauCeti.LinearAlgebra.Matrix.Determinant.RankOne
+import TauCeti.LinearAlgebra.Matrix.Determinant.RankOne
 import Mathlib.Tactic.LinearCombination
 
 /-!
