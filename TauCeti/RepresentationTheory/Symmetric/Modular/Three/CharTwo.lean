@@ -38,15 +38,6 @@ universe u v
 variable {k : Type u} [Field k] [CharP k 2]
   {V : Type v} [AddCommGroup V] [Module k V]
 
-/-- The two-dimensional standard representation of S₃ is irreducible over any field of
-characteristic two. -/
-theorem isIrreducible_standardRepresentation_fin_three_of_charTwo :
-    (standardRepresentation k (Fin 3)).IsIrreducible :=
-  isIrreducible_standardRepresentation (by decide)
-    (Or.inr (by
-      rw [Fintype.card_fin]
-      exact fun h ↦ (by norm_num : ¬ 2 ∣ 3) ((CharP.cast_eq_zero_iff k 2 3).mp h)))
-
 private theorem exists_nonzero_permutation_intertwiner [Nontrivial V]
     (ρ : Representation k (Equiv.Perm (Fin 3)) V) :
     ∃ f : IntertwiningMap (ofMulAction k (Equiv.Perm (Fin 3)) (Fin 3)) ρ, f ≠ 0 := by
@@ -100,17 +91,16 @@ theorem _root_.Representation.IsIrreducible.nonempty_equiv_trivial_or_standard_p
   classical
   let := hρ
   have := hρ.nontrivial
-  have hthree : (Fintype.card (Fin 3) : k) ≠ 0 := by
-    rw [Fintype.card_fin]
-    exact fun h ↦ (by norm_num : ¬ 2 ∣ 3) ((CharP.cast_eq_zero_iff k 2 3).mp h)
+  have hthree : (3 : k) ≠ 0 :=
+    CharP.cast_ne_zero_of_ne_of_prime k (by decide : Nat.Prime 3) (by decide : 2 ≠ 3)
   have hstd : (standardRepresentation k (Fin 3)).IsIrreducible :=
-    isIrreducible_standardRepresentation_fin_three_of_charTwo
+    isIrreducible_standardRepresentation_fin_three hthree
   have : (augmentationSubrepresentation k (Equiv.Perm (Fin 3))
       (Fin 3)).toRepresentation.IsIrreducible := by
     simpa only [toRepresentation_augmentationSubrepresentation] using hstd
   obtain ⟨f, hf⟩ := exists_nonzero_permutation_intertwiner ρ
   let e := ofMulActionEquivProdAugmentation k (Equiv.Perm (Fin 3)) (Fin 3)
-    (isUnit_iff_ne_zero.mpr hthree)
+    (isUnit_iff_ne_zero.mpr (by simpa using hthree))
   let F := f.comp e.symm.toIntertwiningMap
   let a := F.comp (IntertwiningMap.inl k _ _)
   let b := F.comp (IntertwiningMap.inr k _ _)
@@ -118,6 +108,8 @@ theorem _root_.Representation.IsIrreducible.nonempty_equiv_trivial_or_standard_p
     by_contra h
     push Not at h
     apply hf
+    -- Composing the zero intertwining map with either inclusion is definitionally zero,
+    -- so `h.1` and `h.2` give the two equalities required by `prod_ext`.
     have hF : F = 0 := IntertwiningMap.prod_ext
       h.1 h.2
     apply IntertwiningMap.ext

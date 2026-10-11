@@ -61,7 +61,9 @@ private instance simpleFamily_isSimpleModule (b : Bool) :
       (Representation.trivial k (Equiv.Perm (Fin 3)) k)).mp inferInstance
   · exact (_root_.Representation.irreducible_iff_isSimpleModule_asModule
       (standardRepresentation k (Fin 3))).mp
-        isIrreducible_standardRepresentation_fin_three_of_charTwo
+        (isIrreducible_standardRepresentation_fin_three
+          (CharP.cast_ne_zero_of_ne_of_prime k
+            (by decide : Nat.Prime 3) (by decide : 2 ≠ 3)))
 
 /-- The trivial and standard classes form an integral basis of the exact Grothendieck group
 of S₃ in characteristic two. The index `false` denotes the trivial class and `true` the
