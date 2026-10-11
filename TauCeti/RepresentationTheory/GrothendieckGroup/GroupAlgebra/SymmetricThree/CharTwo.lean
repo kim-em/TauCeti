@@ -5,12 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.GrothendieckGroup.GroupAlgebra.Permutation.Augmentation
 public import TauCeti.RepresentationTheory.GrothendieckGroup.GroupAlgebra.Permutation.PrimePower
-public import TauCeti.RepresentationTheory.GrothendieckGroup.GroupAlgebra.Ring
-public import TauCeti.RepresentationTheory.Symmetric.Standard
+public import TauCeti.RepresentationTheory.GrothendieckGroup.GroupAlgebra.Symmetric.Standard
 public import TauCeti.GroupTheory.Perm.FinThree.Basic
-import TauCeti.RepresentationTheory.Induction.PointStabilizer
 
 /-!
 # Permutation classes of `S₃` in characteristic two
@@ -38,35 +35,7 @@ open scoped MonoidAlgebra
 
 namespace TauCeti
 
-variable (k : Type) [Field k]
-
-/-- The natural permutation module of `S₃` has the standard module and the trivial line as
-its Grothendieck constituents in every characteristic. -/
-@[simp]
-theorem permK0_fin_three_eq_one_add_standard :
-    letI : Module.Finite k[Equiv.Perm (Fin 3)] (standardRepresentation k (Fin 3)).asModule :=
-      Module.Finite.of_restrictScalars_finite k k[Equiv.Perm (Fin 3)] _
-    permK0 k (Equiv.Perm (Fin 3)) (Fin 3) =
-      1 + ExactK0.of (FGModuleCat.of k[Equiv.Perm (Fin 3)]
-        (standardRepresentation k (Fin 3)).asModule) := by
-  rw [permK0_eq_augmentation_add_trivial, toRepresentation_augmentationSubrepresentation,
-    ← exactK0_one_eq_of_trivial, add_comm]
-
-/-- Inducing the trivial line from any point stabilizer gives the three-point permutation
-class, namely the trivial class plus the standard class. -/
-@[simp]
-theorem indK0_one_stabilizer_fin_three_eq_one_add_standard (a : Fin 3) :
-    letI : Module.Finite k[Equiv.Perm (Fin 3)] (standardRepresentation k (Fin 3)).asModule :=
-      Module.Finite.of_restrictScalars_finite k k[Equiv.Perm (Fin 3)] _
-    indK0 k (MulAction.stabilizer (Equiv.Perm (Fin 3)) a) 1 =
-      1 + ExactK0.of (FGModuleCat.of k[Equiv.Perm (Fin 3)]
-        (standardRepresentation k (Fin 3)).asModule) := by
-  rw [exactK0_one_eq_of_trivial, indK0_of_trivial,
-    permK0_congr k (quotientStabilizerEquiv (Equiv.Perm (Fin 3)) a)
-      (quotientStabilizerEquiv_smul (Equiv.Perm (Fin 3)) a),
-    permK0_fin_three_eq_one_add_standard]
-
-variable [CharP k 2]
+variable (k : Type) [Field k] [CharP k 2]
 
 /-- In characteristic two, the regular class is twice the class induced from any point
 stabilizer. This removes the two-part of that cyclic subgroup in modular Artin induction. -/
@@ -98,7 +67,7 @@ theorem permK0_regular_fin_three_eq_two_nsmul_one_add_standard :
   rw [← permK0_congr k QuotientGroup.quotientBot.toEquiv quotientBot_equivariant,
     ← indK0_of_trivial, ← exactK0_one_eq_of_trivial,
     indK0_one_bot_eq_two_nsmul_stabilizer_fin_three k 0,
-    indK0_one_stabilizer_fin_three_eq_one_add_standard, nsmul_add]
+    indK0_one_stabilizer_eq_one_add_standard, nsmul_add]
 
 /-- The coset permutation module of `A₃` in characteristic two has two trivial
 composition factors, without claiming that the extension splits. -/
