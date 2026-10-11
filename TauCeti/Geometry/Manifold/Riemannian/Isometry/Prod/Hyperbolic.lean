@@ -7,7 +7,6 @@ module
 
 public import TauCeti.Geometry.Manifold.Riemannian.Isometry.Prod.Ricci
 public import TauCeti.Geometry.Manifold.Riemannian.Hyperbolic.UpperHalfSpace.Curvature
-import TauCeti.Geometry.Manifold.IsManifold.Basic
 
 /-!
 # Isometries of hyperbolic space crossed with a line preserve the tangent splitting
@@ -46,14 +45,10 @@ membership in the vertical tangent line. -/
     (p : H × ℝ) (u : TangentSpace prodModel p) :
     (mfderiv prodModel prodModel Φ p u : WithLp 2 (E × ℝ) × ℝ).1 = 0 ↔
       (u : WithLp 2 (E × ℝ) × ℝ).1 = 0 := by
-  refine Φ.fst_mfderiv_eq_zero_iff_of_ricciTensor_eq_smul_inner
-    (a := -(Module.finrank ℝ E : ℝ)) (b := 0) UpperHalfSpace.ricciTensor_eq ?_ ?_ p u
-  · intro x v w
-    have hzero := (leviCivitaConnection 𝓘(ℝ) ℝ).ricciTensor_eq_zero_of_curvatureTensor_eq_zero x
-      ((leviCivitaConnection 𝓘(ℝ) ℝ).curvatureTensor_eq_zero_of_finrank_le_one x
-        (by simp [finrank_tangentSpace]))
-    simp [hzero]
-  · exact neg_ne_zero.mpr (Nat.cast_ne_zero.mpr (Module.finrank_pos.ne'))
+  exact Φ.fst_mfderiv_eq_zero_iff_of_ricciTensor_eq_smul_inner (b := 0) p
+    (UpperHalfSpace.ricciTensor_eq p.1) (by simp)
+    (UpperHalfSpace.ricciTensor_eq (Φ p).1) (by simp)
+    (by simpa using (Module.finrank_pos (R := ℝ) (M := E)).ne') u
 
 /-- On `ℍⁿ × ℝ` for `n ≥ 2`, an isometry's differential preserves and reflects
 membership in the horizontal tangent subspace. -/
@@ -62,13 +57,9 @@ membership in the horizontal tangent subspace. -/
     (p : H × ℝ) (u : TangentSpace prodModel p) :
     (mfderiv prodModel prodModel Φ p u : WithLp 2 (E × ℝ) × ℝ).2 = 0 ↔
       (u : WithLp 2 (E × ℝ) × ℝ).2 = 0 := by
-  refine Φ.snd_mfderiv_eq_zero_iff_of_ricciTensor_eq_smul_inner
-    (a := -(Module.finrank ℝ E : ℝ)) (b := 0) UpperHalfSpace.ricciTensor_eq ?_ ?_ p u
-  · intro x v w
-    have hzero := (leviCivitaConnection 𝓘(ℝ) ℝ).ricciTensor_eq_zero_of_curvatureTensor_eq_zero x
-      ((leviCivitaConnection 𝓘(ℝ) ℝ).curvatureTensor_eq_zero_of_finrank_le_one x
-        (by simp [finrank_tangentSpace]))
-    simp [hzero]
-  · exact neg_ne_zero.mpr (Nat.cast_ne_zero.mpr (Module.finrank_pos.ne'))
+  exact Φ.snd_mfderiv_eq_zero_iff_of_ricciTensor_eq_smul_inner (b := 0) p
+    (UpperHalfSpace.ricciTensor_eq p.1) (by simp)
+    (UpperHalfSpace.ricciTensor_eq (Φ p).1) (by simp)
+    (by simpa using (Module.finrank_pos (R := ℝ) (M := E)).ne') u
 
 end TauCeti.RiemannianIsometry

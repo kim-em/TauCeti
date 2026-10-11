@@ -11,11 +11,12 @@ public import TauCeti.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvatu
 /-!
 # Isometries preserve product factors with distinct Ricci constants
 
-For a product of two Einstein metrics with distinct Ricci constants, every isometry
-preserves the inner product on each tangent factor separately. Consequently its differential
-preserves the horizontal and vertical tangent subspaces. This is the infinitesimal step in
-identifying the full isometry groups of product geometries such as the hyperbolic plane
-crossed with a line: the Ricci constants are respectively `-1` and `0`.
+If the factor Ricci tensors at a point and its image are scalar multiples of the metrics
+with the same distinct constants, an isometry preserves the inner product on each tangent
+factor at that point. In particular, this applies to products of Einstein metrics.
+Consequently its differential preserves the horizontal and vertical tangent subspaces.
+This is the infinitesimal step in identifying the full isometry groups of product geometries
+such as the hyperbolic plane crossed with a line: the Ricci constants are respectively `-1` and `0`.
 
 The argument combines the product Ricci formula with metric and Ricci invariance under
 isometries. No connectedness, completeness, compactness, or absence of boundary is needed.
@@ -49,12 +50,16 @@ variable
 local notation "split" => TauCeti.Manifold.tangentSpaceProdEquiv (I := I) (J := J)
 
 /-- An isometry of a product with distinct Ricci constants preserves the inner product
-of the first tangent components. -/
+of the first tangent components at a point, assuming the Ricci identities only there
+and at its image. -/
 theorem inner_mfderiv_fst_of_ricciTensor_eq_smul_inner
     (Φ : RiemannianIsometry (I.prod J) (I.prod J) (M × N) (M × N))
-    (hM : ∀ x u v, (leviCivitaConnection I M).ricciTensor x u v = a * inner ℝ u v)
-    (hN : ∀ x u v, (leviCivitaConnection J N).ricciTensor x u v = b * inner ℝ u v)
-    (hab : a ≠ b) (p : M × N) (u v : TangentSpace (I.prod J) p) :
+    (p : M × N)
+    (hM : ∀ u v, (leviCivitaConnection I M).ricciTensor p.1 u v = a * inner ℝ u v)
+    (hN : ∀ u v, (leviCivitaConnection J N).ricciTensor p.2 u v = b * inner ℝ u v)
+    (hM' : ∀ u v, (leviCivitaConnection I M).ricciTensor (Φ p).1 u v = a * inner ℝ u v)
+    (hN' : ∀ u v, (leviCivitaConnection J N).ricciTensor (Φ p).2 u v = b * inner ℝ u v)
+    (hab : a ≠ b) (u v : TangentSpace (I.prod J) p) :
     inner ℝ (split (Φ p) (mfderiv (I.prod J) (I.prod J) Φ p u)).1
         (split (Φ p) (mfderiv (I.prod J) (I.prod J) Φ p v)).1 =
       inner ℝ (split p u).1 (split p v).1 := by
@@ -62,51 +67,63 @@ theorem inner_mfderiv_fst_of_ricciTensor_eq_smul_inner
   rw [TauCeti.Manifold.inner_tangentSpace_prod,
     TauCeti.Manifold.inner_tangentSpace_prod] at hmetric
   have hricci := Φ.ricciTensor_mfderiv p u v
-  simp only [TauCeti.Manifold.ricciTensor_leviCivitaConnection_prod, hM, hN] at hricci
+  simp only [TauCeti.Manifold.ricciTensor_leviCivitaConnection_prod, hM, hN, hM', hN'] at hricci
   apply (mul_left_cancel₀ (sub_ne_zero.mpr hab))
   linear_combination hricci - b * hmetric
 
 /-- An isometry of a product with distinct Ricci constants preserves the inner product
-of the second tangent components. -/
+of the second tangent components at a point, assuming the Ricci identities only there
+and at its image. -/
 theorem inner_mfderiv_snd_of_ricciTensor_eq_smul_inner
     (Φ : RiemannianIsometry (I.prod J) (I.prod J) (M × N) (M × N))
-    (hM : ∀ x u v, (leviCivitaConnection I M).ricciTensor x u v = a * inner ℝ u v)
-    (hN : ∀ x u v, (leviCivitaConnection J N).ricciTensor x u v = b * inner ℝ u v)
-    (hab : a ≠ b) (p : M × N) (u v : TangentSpace (I.prod J) p) :
+    (p : M × N)
+    (hM : ∀ u v, (leviCivitaConnection I M).ricciTensor p.1 u v = a * inner ℝ u v)
+    (hN : ∀ u v, (leviCivitaConnection J N).ricciTensor p.2 u v = b * inner ℝ u v)
+    (hM' : ∀ u v, (leviCivitaConnection I M).ricciTensor (Φ p).1 u v = a * inner ℝ u v)
+    (hN' : ∀ u v, (leviCivitaConnection J N).ricciTensor (Φ p).2 u v = b * inner ℝ u v)
+    (hab : a ≠ b) (u v : TangentSpace (I.prod J) p) :
     inner ℝ (split (Φ p) (mfderiv (I.prod J) (I.prod J) Φ p u)).2
         (split (Φ p) (mfderiv (I.prod J) (I.prod J) Φ p v)).2 =
       inner ℝ (split p u).2 (split p v).2 := by
   have hmetric := Φ.inner_mfderiv p u v
   rw [TauCeti.Manifold.inner_tangentSpace_prod,
     TauCeti.Manifold.inner_tangentSpace_prod] at hmetric
-  have hfst := Φ.inner_mfderiv_fst_of_ricciTensor_eq_smul_inner hM hN hab p u v
+  have hfst := Φ.inner_mfderiv_fst_of_ricciTensor_eq_smul_inner p hM hN hM' hN' hab u v
   linarith
 
 /-- The vertical tangent subspace is preserved and reflected by the differential
-of every isometry of a product with distinct Ricci constants. -/
+of an isometry at a point where the factor Ricci identities hold with distinct
+constants both at the point and at its image. -/
 theorem fst_mfderiv_eq_zero_iff_of_ricciTensor_eq_smul_inner
     (Φ : RiemannianIsometry (I.prod J) (I.prod J) (M × N) (M × N))
-    (hM : ∀ x u v, (leviCivitaConnection I M).ricciTensor x u v = a * inner ℝ u v)
-    (hN : ∀ x u v, (leviCivitaConnection J N).ricciTensor x u v = b * inner ℝ u v)
-    (hab : a ≠ b) (p : M × N) (u : TangentSpace (I.prod J) p) :
+    (p : M × N)
+    (hM : ∀ u v, (leviCivitaConnection I M).ricciTensor p.1 u v = a * inner ℝ u v)
+    (hN : ∀ u v, (leviCivitaConnection J N).ricciTensor p.2 u v = b * inner ℝ u v)
+    (hM' : ∀ u v, (leviCivitaConnection I M).ricciTensor (Φ p).1 u v = a * inner ℝ u v)
+    (hN' : ∀ u v, (leviCivitaConnection J N).ricciTensor (Φ p).2 u v = b * inner ℝ u v)
+    (hab : a ≠ b) (u : TangentSpace (I.prod J) p) :
     (mfderiv (I.prod J) (I.prod J) Φ p u : E × F).1 = 0 ↔ (u : E × F).1 = 0 := by
   have h := (congrArg (fun t : ℝ => t = 0)
-    (Φ.inner_mfderiv_fst_of_ricciTensor_eq_smul_inner hM hN hab p u u)).to_iff
+    (Φ.inner_mfderiv_fst_of_ricciTensor_eq_smul_inner p hM hN hM' hN' hab u u)).to_iff
   simp only [inner_self_eq_zero, TauCeti.Manifold.tangentSpaceProdEquiv_apply] at h
   -- The projection notation reads the product tangent-space synonym in the model;
   -- the identification lemma reads it in the factor tangent-space synonyms.
   convert h using 1 <;> rfl
 
 /-- The horizontal tangent subspace is preserved and reflected by the differential
-of every isometry of a product with distinct Ricci constants. -/
+of an isometry at a point where the factor Ricci identities hold with distinct
+constants both at the point and at its image. -/
 theorem snd_mfderiv_eq_zero_iff_of_ricciTensor_eq_smul_inner
     (Φ : RiemannianIsometry (I.prod J) (I.prod J) (M × N) (M × N))
-    (hM : ∀ x u v, (leviCivitaConnection I M).ricciTensor x u v = a * inner ℝ u v)
-    (hN : ∀ x u v, (leviCivitaConnection J N).ricciTensor x u v = b * inner ℝ u v)
-    (hab : a ≠ b) (p : M × N) (u : TangentSpace (I.prod J) p) :
+    (p : M × N)
+    (hM : ∀ u v, (leviCivitaConnection I M).ricciTensor p.1 u v = a * inner ℝ u v)
+    (hN : ∀ u v, (leviCivitaConnection J N).ricciTensor p.2 u v = b * inner ℝ u v)
+    (hM' : ∀ u v, (leviCivitaConnection I M).ricciTensor (Φ p).1 u v = a * inner ℝ u v)
+    (hN' : ∀ u v, (leviCivitaConnection J N).ricciTensor (Φ p).2 u v = b * inner ℝ u v)
+    (hab : a ≠ b) (u : TangentSpace (I.prod J) p) :
     (mfderiv (I.prod J) (I.prod J) Φ p u : E × F).2 = 0 ↔ (u : E × F).2 = 0 := by
   have h := (congrArg (fun t : ℝ => t = 0)
-    (Φ.inner_mfderiv_snd_of_ricciTensor_eq_smul_inner hM hN hab p u u)).to_iff
+    (Φ.inner_mfderiv_snd_of_ricciTensor_eq_smul_inner p hM hN hM' hN' hab u u)).to_iff
   simp only [inner_self_eq_zero, TauCeti.Manifold.tangentSpaceProdEquiv_apply] at h
   -- The projection notation reads the product tangent-space synonym in the model;
   -- the identification lemma reads it in the factor tangent-space synonyms.
