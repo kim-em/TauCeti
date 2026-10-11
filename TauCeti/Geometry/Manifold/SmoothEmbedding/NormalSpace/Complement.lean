@@ -95,8 +95,9 @@ tangent chart and take its normal class. -/
   simp [normalSpaceEquivOfComplement]
 
 /-- Changing the complement and the ambient tangent chart gives the normal-coordinate
-transition by applying the ambient tangent transition to the old complementary representative. -/
-@[simp↓]
+transition by applying the ambient tangent transition to the old complementary representative.
+Use this rule with `rw`; expanding a general transition during simplification can obscure
+the cancellation of a coordinate equivalence with its inverse. -/
 theorem normalSpaceEquivOfComplement_apply_symm
     {P' : Type*} [TopologicalSpace P'] [AddCommGroup P'] [Module 𝕜 P']
     (f : SmoothEmbedding I J n M N) (hn : n ≠ 0) {x₀ x₁ x : M}
@@ -115,6 +116,18 @@ theorem normalSpaceEquivOfComplement_apply_symm
           (trivializationAt F (TangentSpace J) (f x₁)) (f x)) (B w)) := by
   rw [normalSpaceEquivOfComplement_symm_apply, normalSpaceEquivOfComplement_normalClass,
     Trivialization.coordChangeL_apply _ _ (by simpa using And.intro hy₀ hy₁)]
+
+/-- Normal coordinates recover a parameter from its complementary representative. -/
+-- Cancel before the inverse-coordinate simp rule expands the inner argument.
+@[simp↓] theorem normalSpaceEquivOfComplement_apply_symm_apply
+    (f : SmoothEmbedding I J n M N) (hn : n ≠ 0)
+    {x₀ x : M} (hx : x ∈ (chartAt H x₀).source)
+    (hy : f x ∈ (chartAt G (f x₀)).source) (B : P →L[𝕜] F)
+    (hB : ((inTangentCoordinates I J _root_.id (f : M → N)
+      (mfderiv I J (f : M → N)) x₀ x).coprod B).IsInvertible) (w : P) :
+    f.normalSpaceEquivOfComplement hn hx hy B hB
+        ((f.normalSpaceEquivOfComplement hn hx hy B hB).symm w) = w :=
+  ContinuousLinearEquiv.apply_symm_apply _ w
 
 end Coordinates
 
