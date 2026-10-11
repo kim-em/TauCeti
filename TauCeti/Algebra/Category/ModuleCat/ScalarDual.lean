@@ -146,6 +146,14 @@ theorem rightScalarDualIso_hom_apply {M N : ModuleCat.{w} A} (e : M ≅ N)
       rightScalarDualEquiv k N φ (e.hom x) := by
   simp [rightScalarDualIso]
 
+/-- The inverse isomorphism of right duals acts by precomposition with the inverse. -/
+@[simp]
+theorem rightScalarDualIso_inv_apply {M N : ModuleCat.{w} A} (e : M ≅ N)
+    (φ : rightScalarDual k M) (x : N) :
+    rightScalarDualEquiv k N ((rightScalarDualIso e).inv φ) x =
+      rightScalarDualEquiv k M φ (e.inv x) := by
+  simp [rightScalarDualIso]
+
 variable (k)
 
 /-- Evaluation pairs a finite-dimensional left module with its right scalar dual. -/
