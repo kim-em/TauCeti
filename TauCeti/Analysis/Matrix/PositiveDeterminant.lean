@@ -33,6 +33,8 @@ open scoped ContDiff Matrix.Norms.Elementwise
 
 namespace Matrix.SpecialLinearGroup
 
+-- `SpecialLinearGroup`, matrix identity and determinant require decidable equality
+-- while elaborating the theorem statement.
 variable {𝕜 ι : Type*} [NontriviallyNormedField 𝕜] [Fintype ι] [DecidableEq ι]
 
 /-- A special-linear matrix over a nontrivially normed field admits a smooth matrix family
