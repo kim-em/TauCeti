@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Analysis.Normed.Module.ContinuousInverse
 public import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
-public import Mathlib.Analysis.Calculus.ContDiff.Operations
+import Mathlib.Analysis.Calculus.ContDiff.Operations
 public import TauCeti.Topology.Algebra.Module.ContinuousLinearMap.QuotientRange
 
 /-!
