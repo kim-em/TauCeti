@@ -589,10 +589,6 @@ private theorem continuous_ellipseArc (x : EuclideanSpace ℝ (Fin 3)) :
   unfold ellipseArc
   fun_prop
 
-/-- The parameter `(√2)⁻¹` of the Conway points squares to `1 / 2`. -/
-private theorem sqrt_two_inv_sq : (√2)⁻¹ ^ 2 = 1 / 2 := by
-  rw [inv_pow, Real.sq_sqrt zero_le_two, one_div]
-
 /-- The arc passes through its Conway point at the parameter `(√2)⁻¹`. -/
 private theorem ellipseArc_sqrt_two_inv {x : EuclideanSpace ℝ (Fin 3)} (hx : x ∈ conwayPoints) :
     ellipseArc x (√2)⁻¹ = x := by
@@ -631,7 +627,8 @@ private theorem isConwaySphere_unknotConwayBall (i : Fin 3) :
     rw [inv_lt_comm₀ (by positivity) (by norm_num), Real.lt_sqrt (by norm_num)]
     norm_num
   have hsq : ∀ {t : ℝ}, 0 ≤ t → (t ^ 2 < 1 / 2 ↔ t < (√2)⁻¹) := fun ht ↦ by
-    rw [← sqrt_two_inv_sq, sq_lt_sq₀ ht (by positivity)]
+    simpa only [inv_pow, Real.sq_sqrt zero_le_two, one_div] using
+      (sq_lt_sq₀ (b := (√2)⁻¹) ht (by positivity))
   have hlim : ∀ {x}, x ∈ conwayPoints → Tendsto (ellipseArc x) (𝓝 (√2)⁻¹) (𝓝 x) := fun {x} hx ↦ by
     have := (continuous_ellipseArc x).tendsto (√2)⁻¹
     rwa [ellipseArc_sqrt_two_inv hx] at this
@@ -658,8 +655,8 @@ private theorem isConwaySphere_unknotConwayBall (i : Fin 3) :
     refine ⟨hK, ?_⟩
     rw [mem_ball_zero_iff, ← sq_lt_one_iff₀ (norm_nonneg _), hn]
     have : 1 / 2 < t ^ 2 := by
-      rw [← sqrt_two_inv_sq]
-      exact pow_lt_pow_left₀ ht.1 (by positivity) two_ne_zero
+      simpa only [inv_pow, Real.sq_sqrt zero_le_two, one_div] using
+        (pow_lt_pow_left₀ ht.1 (by positivity) two_ne_zero)
     linarith
   · -- Outside the ball: parameters just below `(√2)⁻¹`.
     refine mem_closure_of_tendsto (f := ellipseArc x) (b := 𝓝[<] (√2)⁻¹)
