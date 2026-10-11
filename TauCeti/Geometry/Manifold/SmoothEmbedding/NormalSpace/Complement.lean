@@ -96,6 +96,7 @@ tangent chart and take its normal class. -/
 
 /-- Changing the complement and the ambient tangent chart gives the normal-coordinate
 transition by applying the ambient tangent transition to the old complementary representative. -/
+@[simp↓]
 theorem normalSpaceEquivOfComplement_apply_symm
     {P' : Type*} [TopologicalSpace P'] [AddCommGroup P'] [Module 𝕜 P']
     (f : SmoothEmbedding I J n M N) (hn : n ≠ 0) {x₀ x₁ x : M}
