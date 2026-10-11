@@ -17,8 +17,8 @@ then the move pushes the isolated circle across its closing arc. If neither posi
 crossings, the existing two-circle clasp applies.
 
 Cyclic rotation places an insertion in an arbitrary word context at the cut of the closed braid.
-Together with cancellation on two crossing-bearing positions, this leaves the mixed case with
-the lower position crossing-free for the full braid-word closure comparison.
+This gives closure equivalence for inserting or removing an inverse pair between arbitrary
+prefixes and suffixes when the higher participating position is crossing-free.
 
 ## References
 
