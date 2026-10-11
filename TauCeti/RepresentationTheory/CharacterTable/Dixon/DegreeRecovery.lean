@@ -73,22 +73,22 @@ theorem recoverCharacterDegree?_sound [DecidableEq R] (conj : R → R)
 private theorem classSizeProduct_pos : 0 < ∏ j, (d.classFinset j).card :=
   Finset.prod_pos fun j _ => Finset.card_pos.mpr ⟨d.rep j, d.rep_mem_classFinset j⟩
 
-/-- The denominator-cleared degree-square identity for a certified exact character table.
-It involves only ring operations, so no division or passage to complex numbers is needed. -/
-theorem IsExactCharacterTableSpec.degree_sq_mul_clearedClassRowNorm_eq_card_mul_classSizeProduct
-    {R : Type*} [CommRing R] {d : ClassData G} {conj : R →+* R}
-    {omega table : Matrix (Fin d.numClasses) (Fin d.numClasses) R}
-    {degree : Fin d.numClasses → ℕ}
-    (h : d.IsExactCharacterTableSpec conj omega table degree) (i : Fin d.numClasses) :
-    (degree i : R) ^ 2 * d.clearedClassRowNorm conj (omega i) =
+/-- Division-free conversion and diagonal row orthogonality imply the denominator-cleared
+degree-square identity over a commutative semiring. No full table certificate is needed. -/
+theorem degree_sq_mul_clearedClassRowNorm_eq_card_mul_classSizeProduct
+    {conj : R →+* R} {row values : Fin d.numClasses → R} {degree : ℕ}
+    (hconvert : ∀ k, (degree : R) * row k = (d.classFinset k).card * values k)
+    (horthogonal : ∑ k, (d.classFinset k).card * values k * conj (values k) =
+      (Fintype.card G : R)) :
+    (degree : R) ^ 2 * d.clearedClassRowNorm conj row =
       (Fintype.card G : R) * (∏ j, (d.classFinset j).card : ℕ) := by
   have hterm (k : Fin d.numClasses) :
-      (degree i : R) ^ 2 *
+      (degree : R) ^ 2 *
           ((∏ j ∈ Finset.univ.erase k, (d.classFinset j).card : ℕ) *
-            omega i k * conj (omega i k)) =
+            row k * conj (row k)) =
         (∏ j, (d.classFinset j).card : ℕ) *
-          ((d.classFinset k).card * table i k * conj (table i k)) := by
-    have hconj := congrArg conj (h.degree_mul_central i k)
+          ((d.classFinset k).card * values k * conj (values k)) := by
+    have hconj := congrArg conj (hconvert k)
     simp only [map_mul, map_natCast] at hconj
     have hprod :
         ((d.classFinset k).card : R) *
@@ -99,15 +99,27 @@ theorem IsExactCharacterTableSpec.degree_sq_mul_clearedClassRowNorm_eq_card_mul_
           (fun j => (d.classFinset j).card) (Finset.mem_univ k))
     calc
       _ = (∏ j ∈ Finset.univ.erase k, (d.classFinset j).card : ℕ) *
-          ((degree i : R) * omega i k) * ((degree i : R) * conj (omega i k)) := by ring
+          ((degree : R) * row k) * ((degree : R) * conj (row k)) := by ring
       _ = (∏ j ∈ Finset.univ.erase k, (d.classFinset j).card : ℕ) *
-          ((d.classFinset k).card * table i k) *
-          ((d.classFinset k).card * conj (table i k)) := by
-        rw [h.degree_mul_central, hconj]
+          ((d.classFinset k).card * values k) *
+          ((d.classFinset k).card * conj (values k)) := by
+        rw [hconvert, hconj]
       _ = _ := by rw [← hprod]; ring
   rw [clearedClassRowNorm_def, Finset.mul_sum,
-    Finset.sum_congr rfl fun k _ => hterm k, ← Finset.mul_sum, h.row_orthogonal i i]
+    Finset.sum_congr rfl fun k _ => hterm k, ← Finset.mul_sum, horthogonal]
   simp [mul_comm]
+
+/-- The denominator-cleared degree-square identity for a certified exact character table.
+It involves only ring operations, so no division or passage to complex numbers is needed. -/
+theorem IsExactCharacterTableSpec.degree_sq_mul_clearedClassRowNorm_eq_card_mul_classSizeProduct
+    {R : Type*} [CommRing R] {d : ClassData G} {conj : R →+* R}
+    {omega table : Matrix (Fin d.numClasses) (Fin d.numClasses) R}
+    {degree : Fin d.numClasses → ℕ}
+    (h : d.IsExactCharacterTableSpec conj omega table degree) (i : Fin d.numClasses) :
+    (degree i : R) ^ 2 * d.clearedClassRowNorm conj (omega i) =
+      (Fintype.card G : R) * (∏ j, (d.classFinset j).card : ℕ) := by
+  exact d.degree_sq_mul_clearedClassRowNorm_eq_card_mul_classSizeProduct
+    (h.degree_mul_central i) (by simpa using h.row_orthogonal i i)
 
 private theorem degree_eq_of_norm_eq {K : Type*} [CommSemiring K] [IsDomain K] [CharZero K]
     (f : R →+* K) {norm : R} {m n : ℕ}
