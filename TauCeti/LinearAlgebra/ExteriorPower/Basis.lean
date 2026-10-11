@@ -222,6 +222,7 @@ variable {R M I : Type*} [CommRing R] [AddCommGroup M] [Module R M]
   [LinearOrder I] [Fintype I]
 
 /-- The matrix of an exterior-power map consists of the corresponding minors. -/
+@[simp]
 theorem toMatrix_exteriorPower_map (b : Basis I R M) (n : ℕ) (f : M →ₗ[R] M)
     (s t : Set.powersetCard I n) :
     LinearMap.toMatrix (b.exteriorPower n) (b.exteriorPower n) (exteriorPower.map n f) s t =
