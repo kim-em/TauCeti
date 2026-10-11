@@ -120,7 +120,7 @@ theorem frontier_image_normalTubeOfRadius (hf : ContMDiff I 𝓘(ℝ, V) 1 f)
 
 end Proper
 
-variable [FiniteDimensional ℝ V] [CompactSpace M]
+variable [ProperSpace V] [CompactSpace M]
 
 /-- For a compact core, the closure of the image of the open normal tube is the image of
 its closed normal disc bundle. This does not require injectivity of the normal map. -/

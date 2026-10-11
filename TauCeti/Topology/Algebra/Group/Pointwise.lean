@@ -62,7 +62,7 @@ in a compact set. -/
 @[to_additive /-- The sums of a closed relation form a closed set if the second coordinate is
 contained in a compact set. -/]
 theorem IsClosed.image_mul_of_snd_subset {G : Type*} [TopologicalSpace G]
-    [Group G] [IsTopologicalGroup G] {s : Set (G × G)} (hs : IsClosed s)
+    [Group G] [ContinuousDiv G] {s : Set (G × G)} (hs : IsClosed s)
     {C : Set G} (hC : IsCompact C) (hsub : Prod.snd '' s ⊆ C) :
     IsClosed ((fun p : G × G => p.1 * p.2) '' s) := by
   have : CompactSpace C := isCompact_iff_compactSpace.mp hC
