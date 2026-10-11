@@ -19,13 +19,15 @@ Consequently, if that character is the evaluation of a polynomial, its coefficie
 dimensions of the corresponding weight spaces. This identifies combinatorial character
 coefficients with representation-theoretic multiplicities.
 
-The trace calculation uses Mathlib's `LinearMap.trace_eq_sum_trace_restrict'`.
-Coefficient recovery uses Artin's independence of torus characters, through
-`TauCeti.linearIndependent_weightCharHom`.
+Coefficient recovery requires an infinite coefficient field and spanning integer weight spaces.
+It identifies coefficients with dimensions cast into the field; in characteristic zero,
+this determines the dimensions as natural numbers.
 
 ## References
 
 * W. Fulton and J. Harris, *Representation Theory: A First Course*, Lecture 15.
+* Formal sources: `LinearMap.trace_eq_sum_trace_restrict'` and
+  `TauCeti.linearIndependent_weightCharHom` (Artin's independence of torus characters).
 -/
 
 public section

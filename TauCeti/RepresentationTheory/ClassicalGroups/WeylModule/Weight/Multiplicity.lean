@@ -18,10 +18,10 @@ counting semistandard tableaux of that content. In particular, the highest weigh
 the row lengths of the shape, has multiplicity one. Determinant twisting gives the same
 one-dimensional highest-weight space for the rational Weyl module of every dominant weight.
 
-The weight decomposition descends from the tensor power through its Young-symmetrizer map.
-The multiplicities follow from the existing Schur character formula and independence of torus
-characters. Together with the dominance bounds and irreducibility, this supplies the highest-weight
-line used to compare concrete Weyl modules with highest-weight modules.
+These dimension results hold over any field of characteristic zero. The polynomial highest-weight
+result requires the shape to have at most `n` rows; the rational result applies to every dominant
+integer weight, including negative entries and rank zero. Together with the dominance bounds and
+irreducibility, they supply the highest-weight line for comparison with highest-weight modules.
 
 ## References
 
