@@ -294,17 +294,25 @@ theorem inner_tangentSpace_prod (p : M × N) (v w : TangentSpace (I.prod J) p) :
 /-- Tangent vectors supported in the first factor have that factor's inner product. -/
 @[simp]
 theorem inner_tangentSpace_prod_mk_zero (p : M × N) (v w : TangentSpace I p.1) :
-    inner ℝ ((tangentSpaceProdEquiv (I := I) (J := J) p).symm (v, 0))
-      ((tangentSpaceProdEquiv (I := I) (J := J) p).symm (w, 0)) = inner ℝ v w := by
-  rw [inner_tangentSpace_prod]
-  simp only [ContinuousLinearEquiv.apply_symm_apply, inner_zero_left, add_zero]
+    inner ℝ (E := TangentSpace (I.prod J) p)
+      ((v, 0) : TangentSpace I p.1 × TangentSpace J p.2)
+      ((w, 0) : TangentSpace I p.1 × TangentSpace J p.2) = inner ℝ v w := by
+  have h := inner_tangentSpace_prod p
+    ((tangentSpaceProdEquiv (I := I) (J := J) p).symm (v, 0))
+    ((tangentSpaceProdEquiv (I := I) (J := J) p).symm (w, 0))
+  simp only [ContinuousLinearEquiv.apply_symm_apply, inner_zero_left, add_zero] at h
+  simpa only [tangentSpaceProdEquiv_symm_apply] using h
 
 /-- Tangent vectors supported in the second factor have that factor's inner product. -/
 @[simp]
 theorem inner_tangentSpace_prod_zero_mk (p : M × N) (v w : TangentSpace J p.2) :
-    inner ℝ ((tangentSpaceProdEquiv (I := I) (J := J) p).symm (0, v))
-      ((tangentSpaceProdEquiv (I := I) (J := J) p).symm (0, w)) = inner ℝ v w := by
-  rw [inner_tangentSpace_prod]
-  simp only [ContinuousLinearEquiv.apply_symm_apply, inner_zero_left, zero_add]
+    inner ℝ (E := TangentSpace (I.prod J) p)
+      ((0, v) : TangentSpace I p.1 × TangentSpace J p.2)
+      ((0, w) : TangentSpace I p.1 × TangentSpace J p.2) = inner ℝ v w := by
+  have h := inner_tangentSpace_prod p
+    ((tangentSpaceProdEquiv (I := I) (J := J) p).symm (0, v))
+    ((tangentSpaceProdEquiv (I := I) (J := J) p).symm (0, w))
+  simp only [ContinuousLinearEquiv.apply_symm_apply, inner_zero_left, zero_add] at h
+  simpa only [tangentSpaceProdEquiv_symm_apply] using h
 
 end TauCeti.Manifold

@@ -73,7 +73,7 @@ theorem exists_prodCongr_of_eq_prodMap
     have h := Q.inner_mfderiv (x, y₀)
       ((Manifold.tangentSpaceProdEquiv (x, y₀)).symm (v, 0))
       ((Manifold.tangentSpaceProdEquiv (x, y₀)).symm (w, 0))
-    rw [Manifold.inner_tangentSpace_prod, Manifold.inner_tangentSpace_prod_mk_zero] at h
+    rw [Manifold.inner_tangentSpace_prod, Manifold.inner_tangentSpace_prod] at h
     rw [hsep] at h
     simp only [Manifold.mfderiv_prodMap_apply (p := (x, y₀)) (φ.mdifferentiable (by simp) x)
       (ψ.mdifferentiable (by simp) y₀), Prod.map, ContinuousLinearEquiv.apply_symm_apply,
@@ -85,7 +85,7 @@ theorem exists_prodCongr_of_eq_prodMap
     have h := Q.inner_mfderiv (x₀, y)
       ((Manifold.tangentSpaceProdEquiv (x₀, y)).symm (0, v))
       ((Manifold.tangentSpaceProdEquiv (x₀, y)).symm (0, w))
-    rw [Manifold.inner_tangentSpace_prod, Manifold.inner_tangentSpace_prod_zero_mk] at h
+    rw [Manifold.inner_tangentSpace_prod, Manifold.inner_tangentSpace_prod] at h
     rw [hsep] at h
     simp only [Manifold.mfderiv_prodMap_apply (p := (x₀, y)) (φ.mdifferentiable (by simp) x₀)
       (ψ.mdifferentiable (by simp) y), Prod.map, ContinuousLinearEquiv.apply_symm_apply,
