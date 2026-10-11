@@ -21,7 +21,8 @@ adds cells in distinct columns. This is the horizontal-strip property needed for
 semistandard recording tableau in the matrix Robinson--Schensted--Knuth correspondence.
 
 The row comparisons require less: weakly increasing rows suffice for the weak comparison,
-and the strict comparison holds even without any tableau hypothesis.
+and the strict comparison holds even without any tableau hypothesis. The descending column
+comparison requires only weakly decreasing row lengths, with no ordering of the entries.
 
 ## References
 
@@ -118,16 +119,16 @@ theorem rowInsert_column_lt_of_le {rows : List (List α)} (hrows : rows.IsTablea
   omega
 
 /-- The second cell lies weakly to the left when the second incoming letter is smaller.
-The column indices are the row lengths before the respective insertions. -/
-theorem rowInsert_column_le_of_lt {rows : List (List α)} (hrows : rows.IsTableauRows)
+The column indices are the row lengths before the respective insertions. Only weakly
+decreasing row lengths are needed; the entries may be unsorted. -/
+theorem rowInsert_column_le_of_lt {rows : List (List α)}
+    (hshape : Antitone fun i => (rows.getD i []).length)
     {x y : α} (hyx : y < x) :
     ((rowInsert x rows).getD (rowInsertIndex y (rowInsert x rows)) []).length ≤
       (rows.getD (rowInsertIndex x rows) []).length := by
   have hrow := rowInsertIndex_lt_of_lt (rows := rows) hyx
   rw [length_getD_rowInsert, ite_eq_right (Ne.symm (Nat.ne_of_lt hrow)), Nat.add_zero]
-  have hanti : Antitone fun i => (rows.getD i []).length :=
-    antitone_nat_of_succ_le hrows.length_getD_succ_le
-  exact hanti hrow.le
+  exact hshape hrow.le
 
 /-- The second new cell lies strictly to the right exactly when the second incoming letter
 is at least the first. This includes equal letters, which produce distinct columns. -/
@@ -140,7 +141,8 @@ theorem rowInsert_column_lt_iff {rows : List (List α)} (hrows : rows.IsTableauR
   constructor
   · intro h
     by_contra hxy
-    exact (not_lt_of_ge (rowInsert_column_le_of_lt hrows (not_le.mp hxy))) h
+    exact (not_lt_of_ge (rowInsert_column_le_of_lt
+      (antitone_nat_of_succ_le hrows.length_getD_succ_le) (not_le.mp hxy))) h
   · exact rowInsert_column_lt_of_le hrows
 
 end TauCeti
