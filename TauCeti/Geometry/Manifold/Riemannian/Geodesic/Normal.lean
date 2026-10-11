@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Geometry.Manifold.LocalDiffeomorph.Basic
 public import TauCeti.Geometry.Manifold.LocalDiffeomorph.Injective
 public import TauCeti.Geometry.Manifold.Riemannian.Geodesic.Exponential
 
@@ -120,11 +121,8 @@ theorem ball (h : IsNormalDomain I M p U) (hU : Metric.ball 0 r ⊆ U) (hr : 0 <
 
 /-- A normal neighbourhood is open. -/
 theorem isOpen_image (h : IsNormalDomain I M p U) :
-    IsOpen (riemannianExp I M p '' U) := by
-  rw [isOpen_iff_mem_nhds]
-  rintro _ ⟨w, hw, rfl⟩
-  rw [← h.isLocalDiffeomorphOn.isLocalHomeomorphOn.map_nhds_eq hw]
-  exact Filter.image_mem_map (h.isOpen.mem_nhds hw)
+    IsOpen (riemannianExp I M p '' U) :=
+  h.isLocalDiffeomorphOn.isOpen_image h.isOpen
 
 /-- A vector of a normal domain can be shrunk towards the origin inside the normal domain. -/
 theorem smul_mem (h : IsNormalDomain I M p U) (hv : v ∈ U) (ht₀ : 0 ≤ t) (ht₁ : t ≤ 1) :

@@ -5,23 +5,26 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Geometry.Manifold.LocalDiffeomorph.Basic
+public import Mathlib.Geometry.Manifold.LocalDiffeomorph
 
 /-!
 # Injective local diffeomorphisms on open sets
 
 A local diffeomorphism that is injective on an open set identifies that set smoothly with
 its image. The inverse is smooth because it agrees near each image point with a local
-smooth inverse. This packages injective normal tubes as partial diffeomorphisms, without
-reconstructing their local inverses or changing the smooth structure on either manifold.
+smooth inverse.
+
+Main results:
+* `IsLocalDiffeomorphOn.isOpen_image`: the image of an open set is open.
+* `IsLocalDiffeomorphOn.contMDiffOn_invFunOn`: the inverse on an injective open set is smooth.
+* `IsLocalDiffeomorphOn.partialDiffeomorphOfInjOn`: the partial diffeomorphism onto the image,
+  with simp lemmas for its source, target, forward function and inverse.
 
 The construction extends Mathlib's `IsLocalDiffeomorph.diffeomorphOfBijective`, using
-`Set.InjOn.toPartialEquiv` for the inverse and its inverse laws. The local-inverse argument
-also generalizes the Riemannian logarithm construction in
-`TauCeti.Geometry.Manifold.Riemannian.Geodesic.Normal`. Nonemptiness of the domain
+`Set.InjOn.toPartialEquiv` for the inverse and its inverse laws. Nonemptiness of the domain
 is required to define the inverse function outside the image, even when the open set is empty.
 
-Reference: J. M. Lee, *Introduction to Smooth Manifolds*, second edition, Theorem 6.24.
+Reference: J. M. Lee, *Introduction to Smooth Manifolds*, second edition, Proposition 4.6.
 -/
 
 public section
@@ -37,11 +40,22 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {H G : Type*} [TopologicalSpace H] [TopologicalSpace G]
   {I : ModelWithCorners 𝕜 E H} {J : ModelWithCorners 𝕜 F G}
   {M N : Type*} [TopologicalSpace M] [ChartedSpace H M]
-  [TopologicalSpace N] [ChartedSpace G N] [Nonempty M]
+  [TopologicalSpace N] [ChartedSpace G N]
   {n : WithTop ℕ∞} {f : M → N} {s : Set M}
 
 namespace IsLocalDiffeomorphOn
 
+/-- The image of an open set under a local diffeomorphism on that set is open. -/
+theorem isOpen_image (hf : IsLocalDiffeomorphOn I J n f s) (hs : IsOpen s) :
+    IsOpen (f '' s) := by
+  apply isOpen_iff_mem_nhds.mpr
+  rintro _ ⟨x, hx, rfl⟩
+  rw [← hf.isLocalHomeomorphOn.map_nhds_eq hx]
+  exact Filter.image_mem_map (hs.mem_nhds hx)
+
+variable [Nonempty M]
+
+-- The inverse proof adapts `TauCeti.Manifold.IsNormalDomain.contMDiffOn_riemannianLog`.
 /-- The inverse of a local diffeomorphism injective on an open set is `C^n` on its image.
 The values chosen outside the image impose no regularity requirement. -/
 theorem contMDiffOn_invFunOn (hf : IsLocalDiffeomorphOn I J n f s)
@@ -66,11 +80,7 @@ def partialDiffeomorphOfInjOn (hf : IsLocalDiffeomorphOn I J n f s)
     (hs : IsOpen s) (hinj : InjOn f s) : PartialDiffeomorph I J M N n where
   toPartialEquiv := hinj.toPartialEquiv f s
   open_source := hs
-  open_target := by
-    apply isOpen_iff_mem_nhds.mpr
-    rintro _ ⟨x, hx, rfl⟩
-    rw [← hf.isLocalHomeomorphOn.map_nhds_eq hx]
-    exact Filter.image_mem_map (hs.mem_nhds hx)
+  open_target := hf.isOpen_image hs
   contMDiffOn_toFun := hf.contMDiffOn
   contMDiffOn_invFun := hf.contMDiffOn_invFunOn hs hinj
 
