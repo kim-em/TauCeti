@@ -114,7 +114,7 @@ theorem signedInvert_eq_self_iff_exists_eval₂ (p : R[T;T⁻¹]) :
   have hpair (n : ℕ) :
       Polynomial.eval₂ C (T 1 - T (-1)) (Polynomial.dickson 1 (-1 : R) n) =
         T (n : ℤ) + C ((-1 : R) ^ n) * T (-(n : ℤ)) := by
-    have h := Polynomial.eval₂_dickson_one C (-1 : R)
+    have h := Polynomial.dickson_one_eval₂_add C (-1 : R)
       (T 1 : R[T;T⁻¹]) (-T (-1)) (by rw [mul_neg, ← T_add]; simp) n
     rw [neg_pow, T_pow, T_pow] at h
     simpa only [sub_eq_add_neg, neg_one_mul, Int.one_mul, neg_mul,

@@ -29,7 +29,7 @@ variable {R S : Type*} [CommRing R] [CommRing S]
 
 /-- Dickson polynomials of the first kind express the power sums of two elements
 whose product is the parameter, after any coefficient homomorphism. -/
-theorem eval₂_dickson_one (f : R →+* S) (a : R) (x y : S) (h : x * y = f a)
+theorem dickson_one_eval₂_add (f : R →+* S) (a : R) (x y : S) (h : x * y = f a)
     (n : ℕ) :
     (dickson 1 a n).eval₂ f (x + y) = x ^ n + y ^ n := by
   induction n using Nat.twoStepInduction with

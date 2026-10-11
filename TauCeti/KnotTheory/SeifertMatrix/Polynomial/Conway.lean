@@ -133,18 +133,39 @@ coefficient rings of characteristic two. -/
 theorem coeff_conwayPolynomial_eq_zero_of_odd (V : Matrix ι ι R)
     (h : Even (Fintype.card ι)) (n : ℕ) (hn : Odd n) :
     V.conwayPolynomial.coeff n = 0 := by
+  -- The sign identity alone cannot force coefficient vanishing in characteristic two.
   obtain ⟨q, hq⟩ := exists_conwayPolynomial_eq_comp_X_sq V h
   rw [hq, ← Polynomial.expand_eq_comp_X_pow,
     Polynomial.coeff_expand (by norm_num : 0 < 2)]
   simp only [hn.not_two_dvd_nat, ↓reduceIte]
 
-/-- Substituting the negative variable preserves the canonical Conway polynomial. -/
+/-- Substituting the negative variable multiplies the canonical Conway polynomial by
+the sign of the matrix size. -/
+theorem conwayPolynomial_comp_neg_X_eq_smul (V : Matrix ι ι R) :
+    V.conwayPolynomial.comp (-Polynomial.X) =
+      (-1 : R) ^ Fintype.card ι • V.conwayPolynomial := by
+  apply eval₂_C_T_neg_sub_T_injective (R := R)
+  have hmatrix : V.seifertConwayMatrix.map invert.toRingHom = -V.seifertConwayMatrixᵀ := by
+    ext i j
+    simp [seifertConwayMatrix_apply, sub_eq_add_neg]
+  have hcomp : invert.toRingHom.comp (C : R →+* R[T;T⁻¹]) = C := by
+    ext r
+    simp
+  have hdet : invert.toRingHom V.seifertConwayDeterminant =
+      (-1 : R[T;T⁻¹]) ^ Fintype.card ι * V.seifertConwayDeterminant := by
+    rw [seifertConwayDeterminant_def, RingHom.map_det, RingHom.mapMatrix_apply,
+      hmatrix, det_neg, det_transpose]
+  have h := congrArg invert.toRingHom (V.eval₂_C_conwayPolynomial)
+  rw [Polynomial.hom_eval₂, hcomp, hdet] at h
+  simpa [Polynomial.eval₂_comp, Polynomial.smul_eq_C_mul, Polynomial.eval₂_pow,
+    neg_sub] using h
+
+/-- Substituting the negative variable preserves the canonical Conway polynomial
+of an even-size matrix. -/
 @[simp]
 theorem conwayPolynomial_comp_neg_X (V : Matrix ι ι R) (h : Even (Fintype.card ι)) :
     V.conwayPolynomial.comp (-Polynomial.X) = V.conwayPolynomial := by
-  obtain ⟨q, hq⟩ := exists_conwayPolynomial_eq_comp_X_sq V h
-  rw [hq, Polynomial.comp_assoc]
-  simp
+  rw [conwayPolynomial_comp_neg_X_eq_smul, h.neg_one_pow, one_smul]
 
 /-- Equal normalized Alexander polynomials and equal size parity give equal Conway
 polynomials. The matrices may have different index types and different sizes. -/
