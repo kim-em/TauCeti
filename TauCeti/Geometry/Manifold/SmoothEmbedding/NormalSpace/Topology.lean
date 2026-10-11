@@ -113,7 +113,7 @@ variable {E' F' H' G' M' N' K' : Type*}
 omit [IsManifold J 1 N] in
 /-- On an ambient tangent representative, the induced normal-bundle map takes the normal
 class of the ambient differential of the representative. -/
-theorem normalBundleMap_normalQuotientMap
+@[simp↓] theorem normalBundleMap_normalQuotientMap
     (f : SmoothEmbedding I J n M N) (g : SmoothEmbedding I' J' m M' N')
     (hn : n ≠ 0) (hm : m ≠ 0) {u : M → M'} {v : N → N'}
     (hu : MDifferentiable I I' u) (hv : MDifferentiable J J' v)

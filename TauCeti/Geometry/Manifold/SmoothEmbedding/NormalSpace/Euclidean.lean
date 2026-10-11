@@ -164,7 +164,7 @@ def normalBundleHomeomorphOrthogonal (f : SmoothEmbedding I 𝓘(ℝ, V) n M V) 
 
 /-- Taking an ambient normal class and then its orthogonal representative is the normal
 projection, with the base point fixed. -/
-theorem normalBundleHomeomorphOrthogonal_normalQuotientMap
+@[simp↓] theorem normalBundleHomeomorphOrthogonal_normalQuotientMap
     (f : SmoothEmbedding I 𝓘(ℝ, V) n M V) (hn : n ≠ 0)
     (p : TotalSpace V ((f : M → V) *ᵖ (TangentSpace 𝓘(ℝ, V)))) :
     f.normalBundleHomeomorphOrthogonal hn (f.normalQuotientMap (K := F) hn p) =
