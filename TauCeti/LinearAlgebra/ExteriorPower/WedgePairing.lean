@@ -22,6 +22,7 @@ namespace exteriorPower
 variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M] {k l : ℕ}
 
 /-- The wedge product of pure exterior products concatenates their vector families. -/
+@[simp 1100]
 theorem wedge_ιMulti (u : Fin k → M) (v : Fin l → M) :
     wedge R M k l (ιMulti R k u) (ιMulti R l v) = ιMulti R (k + l) (Fin.append u v) := by
   apply Subtype.ext
