@@ -39,6 +39,7 @@ def weight : Fin 3 → ℕ := ![1, 1, 2]
 theorem weight_def : weight = ![1, 1, 2] := (rfl)
 
 /-- The weight of an exponent vector is `a + b + 2c`. -/
+@[simp]
 theorem weight_eq {n : Fin 3 →₀ ℕ} :
     Finsupp.weight weight n = n 0 + n 1 + 2 * n 2 := by
   simp [Finsupp.weight_eq_sum, Fin.sum_univ_three, weight, mul_comm]
