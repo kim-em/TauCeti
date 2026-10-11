@@ -46,6 +46,7 @@ public section
 namespace Representation.IntertwiningMap
 
 /-- Two intertwining maps out of a product agree if they agree on both inclusions. -/
+@[ext 1100]
 theorem prod_ext {A G V W U : Type*} [Semiring A] [Monoid G]
     [AddCommMonoid V] [Module A V] [AddCommMonoid W] [Module A W]
     [AddCommMonoid U] [Module A U]
