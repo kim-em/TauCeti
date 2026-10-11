@@ -54,7 +54,7 @@ def orthantFlattening : ((ι → ℝ) × ℝ) ≃ₜ ((ι → ℝ) × ℝ) := by
   · intro p
     apply Prod.ext
     · funext i
-      have h := congrFun (orthantProjection_orthantLift (orthantProjection p)) i
+      have h := orthantLift_fst_sub_snd (orthantProjection p) i
       simp only [orthantProjection_apply, Pi.add_apply] at h ⊢
       linarith
     · simp
@@ -62,7 +62,7 @@ def orthantFlattening : ((ι → ℝ) × ℝ) ≃ₜ ((ι → ℝ) × ℝ) := by
     have hp : orthantProjection
         ((orthantLift q.1).1 + fun _ => q.2, (orthantLift q.1).2 + q.2) = q.1 := by
       ext i
-      have h := congrFun (orthantProjection_orthantLift q.1) i
+      have h := orthantLift_fst_sub_snd q.1 i
       simp only [orthantProjection_apply, Pi.add_apply] at h ⊢
       linarith
     simp [hp]
@@ -89,7 +89,9 @@ theorem isPiecewiseAffineOn_orthantFlattening :
     (mapsTo_univ _ _)
   exact ((isPiecewiseAffineOn_continuousAffineMap A.toContinuousAffineMap univ).comp
     ((isPiecewiseAffineOn_continuousAffineMap (ContinuousAffineMap.id ℝ _) univ).prodMk hl)
-    (mapsTo_univ _ _)).congr (fun _ _ => rfl)
+    (mapsTo_univ _ _)).congr (fun p _ => by
+      rw [orthantFlattening_apply]
+      ext i <;> simp [A])
 
 /-- The inverse flattening is piecewise affine on the whole ambient space. -/
 theorem isPiecewiseAffineOn_orthantFlattening_symm :
@@ -118,7 +120,7 @@ theorem orthantFlattening_snd_eq_inf (p : (ι → ℝ) × ℝ) :
       Finset.univ.inf' Finset.univ_nonempty (Option.elim' p.2 p.1) := by
   obtain ⟨hx, ht, hz⟩ := (mem_frontier_nonnegOrthant_iff _).mp
     (orthantLift_mem_frontier (orthantProjection p))
-  have he (i : ι) := congrFun (orthantProjection_orthantLift (orthantProjection p)) i
+  have he (i : ι) := orthantLift_fst_sub_snd (orthantProjection p) i
   simp only [orthantProjection_apply] at he
   apply le_antisymm
   · apply Finset.le_inf'
