@@ -115,7 +115,7 @@ theorem isPiecewiseAffineOn_orthantFlattening_symm :
       ext i <;> simp [A])
 
 /-- The normal coordinate is the minimum of the original coordinates, including the last one. -/
-theorem orthantFlattening_snd_eq_inf (p : (ι → ℝ) × ℝ) :
+theorem orthantFlattening_snd_eq_inf' (p : (ι → ℝ) × ℝ) :
     (orthantFlattening p).2 =
       Finset.univ.inf' Finset.univ_nonempty (Option.elim' p.2 p.1) := by
   obtain ⟨hx, ht, hz⟩ := (mem_frontier_nonnegOrthant_iff _).mp
@@ -136,9 +136,9 @@ theorem orthantFlattening_snd_eq_inf (p : (ι → ℝ) × ℝ) :
       linarith [he i]
 
 /-- The orthant condition becomes nonnegativity of the normal coordinate. -/
-theorem mem_nonnegOrthant_iff_orthantFlattening (p : (ι → ℝ) × ℝ) :
+theorem mem_nonnegOrthant_iff_nonneg_orthantFlattening_snd (p : (ι → ℝ) × ℝ) :
     p ∈ Ici (0 : (ι → ℝ) × ℝ) ↔ 0 ≤ (orthantFlattening p).2 := by
-  rw [orthantFlattening_snd_eq_inf, Finset.le_inf'_iff]
+  rw [orthantFlattening_snd_eq_inf', Finset.le_inf'_iff]
   simp only [mem_Ici, Prod.le_def, Pi.le_def, Finset.mem_univ, forall_const]
   constructor
   · rintro ⟨hx, ht⟩ (_ | i)
@@ -152,14 +152,14 @@ theorem orthantFlattening_image_nonnegOrthant :
     orthantFlattening '' Ici (0 : (ι → ℝ) × ℝ) = {q | 0 ≤ q.2} := by
   rw [Homeomorph.image_eq_preimage_symm]
   ext q
-  simp only [mem_preimage, mem_ofPred_eq, mem_nonnegOrthant_iff_orthantFlattening,
+  simp only [mem_preimage, mem_ofPred_eq, mem_nonnegOrthant_iff_nonneg_orthantFlattening_snd,
     Homeomorph.apply_symm_apply]
 
 /-- The orthant frontier is exactly where the flattened normal coordinate vanishes. -/
-theorem mem_frontier_nonnegOrthant_iff_orthantFlattening (p : (ι → ℝ) × ℝ) :
+theorem mem_frontier_nonnegOrthant_iff_orthantFlattening_snd_eq_zero (p : (ι → ℝ) × ℝ) :
     p ∈ frontier (Ici (0 : (ι → ℝ) × ℝ)) ↔ (orthantFlattening p).2 = 0 := by
   rw [mem_frontier_nonnegOrthant_iff]
-  have hmin := orthantFlattening_snd_eq_inf p
+  have hmin := orthantFlattening_snd_eq_inf' p
   constructor
   · rintro ⟨hx, ht, hz⟩
     apply le_antisymm
@@ -169,9 +169,9 @@ theorem mem_frontier_nonnegOrthant_iff_orthantFlattening (p : (ι → ℝ) × �
         Finset.inf'_le (Option.elim' p.2 p.1) (Finset.mem_univ none)
       · simpa only [Option.elim'_some, hi] using
           Finset.inf'_le (Option.elim' p.2 p.1) (Finset.mem_univ (some i))
-    · exact (mem_nonnegOrthant_iff_orthantFlattening p).mp ⟨hx, ht⟩
+    · exact (mem_nonnegOrthant_iff_nonneg_orthantFlattening_snd p).mp ⟨hx, ht⟩
   · intro hp
-    obtain ⟨hx, ht⟩ := (mem_nonnegOrthant_iff_orthantFlattening p).mpr hp.ge
+    obtain ⟨hx, ht⟩ := (mem_nonnegOrthant_iff_nonneg_orthantFlattening_snd p).mpr hp.ge
     refine ⟨hx, ht, ?_⟩
     obtain ⟨i, _, hi⟩ := Finset.exists_mem_eq_inf' Finset.univ_nonempty
       (Option.elim' p.2 p.1)
@@ -184,7 +184,7 @@ theorem mem_frontier_nonnegOrthant_iff_orthantFlattening (p : (ι → ℝ) × �
 Both maps are restrictions of the ambient piecewise-affine flattening and its inverse. -/
 def orthantHalfSpaceHomeomorph :
     Ici (0 : (ι → ℝ) × ℝ) ≃ₜ {q : (ι → ℝ) × ℝ | 0 ≤ q.2} :=
-  orthantFlattening.subtype mem_nonnegOrthant_iff_orthantFlattening
+  orthantFlattening.subtype mem_nonnegOrthant_iff_nonneg_orthantFlattening_snd
 
 /-- The half-space homeomorphism uses the ambient flattening formula. -/
 @[simp] theorem coe_orthantHalfSpaceHomeomorph_apply
