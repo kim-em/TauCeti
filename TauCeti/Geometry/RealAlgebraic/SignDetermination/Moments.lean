@@ -14,18 +14,18 @@ import Mathlib.Algebra.BigOperators.Ring.Finset
 /-! # Finite sign determination
 
 `SignType.lagrangeCoeff` gives the coefficients of the Lagrange indicator
-polynomials on `{-1,0,1}`. The full ternary moment matrix `fullMatrix` has one row
-per exponent word and one column per sign word. Its tensor inverse `fullInverse`
-is both a left and a right inverse; `fullInverse_mulVec` recovers occurrence
-counts from all sign moments, including when the coordinate set is empty.
+polynomials on `{-1,0,1}`. The one-coordinate matrix `signMatrix` has rows indexed by
+the exponents `0, 1, 2`, columns indexed by the signs, and entries `σ ^ e`; its
+two-sided inverse `signInverse` has the Lagrange coefficients as entries.
 
-The full matrix is built from the one-coordinate matrix `coordMatrix`, with rows the
-exponents `0, 1, 2`, columns the signs, and entries `σ ^ e` (so `0 ^ 0 = 1`). This matrix is
-invertible over `ℚ`, with inverse `coordInverse` given by the Lagrange indicators. The full
-matrix and its inverse are Kronecker products along any splitting of the coordinates
-(`fullMatrix_sum`, `fullInverse_sum`), so for `n + 1` coordinates they are the Kronecker
-products of the one-coordinate matrices with the full matrices for `n` coordinates
-(`fullMatrix_fin_succ`, `fullInverse_fin_succ`).
+The full ternary moment matrix `fullMatrix` has one row per exponent word and one
+column per sign word. It is the Kronecker power of `signMatrix`: `fullMatrix_sum`
+splits it along a disjoint union of coordinate sets, `fullMatrix_fin_succ` along the
+first coordinate, and it is `signMatrix` for one coordinate; with no coordinates it
+is the one-by-one matrix with entry `1`. Its tensor inverse `fullInverse` is the same
+Kronecker power of `signInverse`, and is both a left and a right inverse;
+`fullInverse_mulVec` recovers occurrence counts from all sign moments, including when
+the coordinate set is empty.
 
 Here `X` indexes observations and `J` indexes the sign queries.
 
@@ -48,6 +48,54 @@ open Function (occCount)
 namespace TauCeti.SignDetermination
 
 open SignType
+
+/-! ### The one-coordinate matrix -/
+
+/-- The one-coordinate sign matrix, with rows indexed by the exponents `0, 1, 2`,
+columns indexed by the signs, and entry `σ ^ e` in row `e` and column `σ`
+(with `0 ^ 0 = 1`). Up to indexing it is the transposed Vandermonde matrix of the three
+signs; its columns are indexed by `SignType`, matching the sign words of `fullMatrix`. -/
+def signMatrix : Matrix (Fin 3) SignType ℚ :=
+  Matrix.of fun e σ => (σ : ℚ) ^ e.val
+
+/-- The inverse of the one-coordinate sign matrix: its row `σ` lists the coefficients of
+the Lagrange indicator polynomial of the sign `σ` on `{-1,0,1}`. -/
+def signInverse : Matrix SignType (Fin 3) ℚ :=
+  Matrix.of fun σ e => lagrangeCoeff σ e
+
+@[simp, grind =]
+theorem signMatrix_apply (e : Fin 3) (σ : SignType) : signMatrix e σ = (σ : ℚ) ^ e.val :=
+  (rfl)
+
+@[simp, grind =]
+theorem signInverse_apply (σ : SignType) (e : Fin 3) : signInverse σ e = lagrangeCoeff σ e :=
+  (rfl)
+
+/-- `signInverse` is a left inverse of the one-coordinate sign matrix. -/
+@[simp, grind =]
+theorem signInverse_mul_signMatrix : signInverse * signMatrix = 1 := by
+  ext σ τ
+  simp [Matrix.mul_apply, Matrix.one_apply]
+
+/-- `signInverse` is also a right inverse of the one-coordinate sign matrix, so
+`signMatrix` is invertible over `ℚ`. -/
+@[simp, grind =]
+theorem signMatrix_mul_signInverse : signMatrix * signInverse = 1 :=
+  (Matrix.mul_eq_one_comm_of_card_eq SignType (Fin 3) ℚ (by decide)).mp
+    signInverse_mul_signMatrix
+
+/-- The one-coordinate sign matrix is invertible over `ℚ`, for any ordering of the signs as
+its columns. -/
+theorem isUnit_signMatrix_submatrix (e : Fin 3 ≃ SignType) :
+    IsUnit (signMatrix.submatrix id e) := by
+  refine ⟨⟨signMatrix.submatrix id e, signInverse.submatrix e id, ?_, ?_⟩, rfl⟩
+  · rw [Matrix.submatrix_mul_equiv, signMatrix_mul_signInverse, Matrix.submatrix_id_id]
+  · rw [← Matrix.submatrix_mul _ _ _ _ _ Function.bijective_id, signInverse_mul_signMatrix,
+      Matrix.submatrix_one_equiv]
+
+/-! ### The full ternary moment matrix -/
+
+section Full
 
 variable {X : Type*} [Fintype X]
 variable (J : Type*) [Fintype J] [DecidableEq J]
@@ -105,6 +153,15 @@ theorem fullMatrix_mul_fullInverse : fullMatrix J * fullInverse J = 1 := by
   have hs : Fintype.card SignType = Fintype.card (Fin 3) := by decide
   rw [hs]
 
+/-- The full ternary moment matrix is invertible over `ℚ`, for any ordering of the sign words
+as its columns. -/
+theorem isUnit_fullMatrix_submatrix (e : (J → Fin 3) ≃ (J → SignType)) :
+    IsUnit ((fullMatrix J).submatrix id e) := by
+  refine ⟨⟨(fullMatrix J).submatrix id e, (fullInverse J).submatrix e id, ?_, ?_⟩, rfl⟩
+  · rw [Matrix.submatrix_mul_equiv, fullMatrix_mul_fullInverse, Matrix.submatrix_id_id]
+  · rw [← Matrix.submatrix_mul _ _ _ _ _ Function.bijective_id, fullInverse_mul_fullMatrix,
+      Matrix.submatrix_one_equiv]
+
 /-- The full sign matrix maps the actual multiplicities to the sign moments. -/
 theorem fullMatrix_mulVec_occCount (obs : X → (J → SignType)) :
     fullMatrix J *ᵥ (fun σ => (occCount obs σ : ℚ)) =
@@ -120,62 +177,11 @@ theorem fullInverse_mulVec (obs : X → (J → SignType)) :
   rw [← fullMatrix_mulVec_occCount, Matrix.mulVec_mulVec,
     fullInverse_mul_fullMatrix, Matrix.one_mulVec]
 
-end TauCeti.SignDetermination
+end Full
 
-/-! ### The one-coordinate matrix and Kronecker products -/
+/-! ### Kronecker product structure -/
 
-namespace TauCeti.SignDetermination
-
-open SignType
-
-variable (J : Type*) [Fintype J]
-
-/-- The one-coordinate sign moment matrix: its rows are the exponents `0, 1, 2`, its columns
-are the signs, and its entry at `(e, σ)` is `σ ^ e`, with `0 ^ 0 = 1`. -/
-def coordMatrix : Matrix (Fin 3) SignType ℚ :=
-  Matrix.of fun e σ => (σ : ℚ) ^ e.val
-
-/-- The inverse of the one-coordinate sign moment matrix, whose rows are the coefficients of
-the Lagrange indicator polynomials on `{-1, 0, 1}`. -/
-def coordInverse : Matrix SignType (Fin 3) ℚ :=
-  Matrix.of lagrangeCoeff
-
-@[simp, grind =]
-theorem coordMatrix_apply (e : Fin 3) (σ : SignType) : coordMatrix e σ = (σ : ℚ) ^ e.val :=
-  (rfl)
-
-@[simp, grind =]
-theorem coordInverse_apply (σ : SignType) (e : Fin 3) : coordInverse σ e = lagrangeCoeff σ e :=
-  (rfl)
-
-/-- `coordInverse` is a left inverse of the one-coordinate sign moment matrix. -/
-@[simp, grind =]
-theorem coordInverse_mul_coordMatrix : coordInverse * coordMatrix = 1 := by
-  ext σ τ
-  simp [Matrix.mul_apply, Matrix.one_apply]
-
-/-- `coordInverse` is a right inverse of the one-coordinate sign moment matrix. -/
-@[simp, grind =]
-theorem coordMatrix_mul_coordInverse : coordMatrix * coordInverse = 1 :=
-  (Matrix.mul_eq_one_comm_of_equiv SignType.fin3Equiv.toEquiv).mp coordInverse_mul_coordMatrix
-
-/-- The one-coordinate sign moment matrix is invertible over `ℚ`, for any ordering of the
-signs as its columns. -/
-theorem isUnit_coordMatrix_submatrix (e : Fin 3 ≃ SignType) :
-    IsUnit (coordMatrix.submatrix id e) := by
-  refine ⟨⟨coordMatrix.submatrix id e, coordInverse.submatrix e id, ?_, ?_⟩, rfl⟩
-  · rw [Matrix.submatrix_mul_equiv, coordMatrix_mul_coordInverse, Matrix.submatrix_id_id]
-  · rw [← Matrix.submatrix_mul _ _ _ _ _ Function.bijective_id, coordInverse_mul_coordMatrix,
-      Matrix.submatrix_one_equiv]
-
-/-- The full ternary moment matrix is invertible over `ℚ`, for any ordering of the sign words
-as its columns. -/
-theorem isUnit_fullMatrix_submatrix [DecidableEq J] (e : (J → Fin 3) ≃ (J → SignType)) :
-    IsUnit ((fullMatrix J).submatrix id e) := by
-  refine ⟨⟨(fullMatrix J).submatrix id e, (fullInverse J).submatrix e id, ?_, ?_⟩, rfl⟩
-  · rw [Matrix.submatrix_mul_equiv, fullMatrix_mul_fullInverse, Matrix.submatrix_id_id]
-  · rw [← Matrix.submatrix_mul _ _ _ _ _ Function.bijective_id, fullInverse_mul_fullMatrix,
-      Matrix.submatrix_one_equiv]
+variable {J : Type*} [Fintype J] {K : Type*} [Fintype K]
 
 /-- With no coordinates, every entry of the full ternary moment matrix is the empty
 product `1`. -/
@@ -188,56 +194,50 @@ theorem fullInverse_of_isEmpty [IsEmpty J] : fullInverse J = Matrix.of fun _ _ =
   ext σ e
   simp
 
-/-- With a single coordinate, the full ternary moment matrix is the one-coordinate matrix. -/
-theorem fullMatrix_unique [Unique J] :
+/-- With one coordinate, the full ternary moment matrix is the one-coordinate sign matrix. -/
+theorem fullMatrix_of_unique [Unique J] :
     fullMatrix J =
-      coordMatrix.submatrix (Equiv.funUnique J (Fin 3)) (Equiv.funUnique J SignType) := by
+      signMatrix.submatrix (Equiv.funUnique J (Fin 3)) (Equiv.funUnique J SignType) := by
   ext e σ
   simp
 
-/-- With a single coordinate, the tensor inverse is the one-coordinate inverse. -/
-theorem fullInverse_unique [Unique J] :
+/-- With one coordinate, the tensor inverse is the one-coordinate inverse. -/
+theorem fullInverse_of_unique [Unique J] :
     fullInverse J =
-      coordInverse.submatrix (Equiv.funUnique J SignType) (Equiv.funUnique J (Fin 3)) := by
+      signInverse.submatrix (Equiv.funUnique J SignType) (Equiv.funUnique J (Fin 3)) := by
   ext σ e
   simp
 
-variable (K : Type*) [Fintype K]
-
-/-- **Kronecker-product identity.** Splitting the coordinates as `J ⊕ K` splits the full
-ternary moment matrix as the Kronecker product of the full matrices for `J` and `K`. -/
+/-- **Kronecker-product identity.** Along a disjoint union of coordinate sets, the full
+ternary moment matrix is the Kronecker product of the full matrices of the two parts,
+reading exponent and sign words on `J ⊕ K` as pairs of words on `J` and on `K`. -/
 theorem fullMatrix_sum :
-    fullMatrix (J ⊕ K) =
-      (fullMatrix J ⊗ₖ fullMatrix K).submatrix (Equiv.sumArrowEquivProdArrow J K (Fin 3))
-        (Equiv.sumArrowEquivProdArrow J K SignType) := by
+    fullMatrix (J ⊕ K) = (fullMatrix J ⊗ₖ fullMatrix K).submatrix
+      (Equiv.sumArrowEquivProdArrow J K (Fin 3)) (Equiv.sumArrowEquivProdArrow J K SignType) := by
   ext e σ
   simp [Fintype.prod_sum_type]
 
-/-- Splitting the coordinates as `J ⊕ K` splits the tensor inverse as the Kronecker product of
-the tensor inverses for `J` and `K`. -/
+/-- Along a disjoint union of coordinate sets, the tensor inverse is the Kronecker product of
+the tensor inverses of the two parts. -/
 theorem fullInverse_sum :
-    fullInverse (J ⊕ K) =
-      (fullInverse J ⊗ₖ fullInverse K).submatrix (Equiv.sumArrowEquivProdArrow J K SignType)
-        (Equiv.sumArrowEquivProdArrow J K (Fin 3)) := by
+    fullInverse (J ⊕ K) = (fullInverse J ⊗ₖ fullInverse K).submatrix
+      (Equiv.sumArrowEquivProdArrow J K SignType) (Equiv.sumArrowEquivProdArrow J K (Fin 3)) := by
   ext σ e
   simp [Fintype.prod_sum_type]
 
-/-- **Kronecker-product identity.** The full ternary moment matrix for `n + 1` coordinates is
-the Kronecker product of the one-coordinate matrix, for coordinate `0`, with the full matrix
-for the remaining `n` coordinates. -/
+/-- Splitting off the first coordinate, the full ternary moment matrix is the Kronecker product
+of the one-coordinate sign matrix with the full matrix of the remaining coordinates. -/
 theorem fullMatrix_fin_succ (n : ℕ) :
-    fullMatrix (Fin (n + 1)) =
-      (coordMatrix ⊗ₖ fullMatrix (Fin n)).submatrix (Fin.consEquiv fun _ ↦ Fin 3).symm
-        (Fin.consEquiv fun _ ↦ SignType).symm := by
+    fullMatrix (Fin (n + 1)) = (signMatrix ⊗ₖ fullMatrix (Fin n)).submatrix
+      (Fin.consEquiv fun _ => Fin 3).symm (Fin.consEquiv fun _ => SignType).symm := by
   ext e σ
   simp [Fin.prod_univ_succ, Fin.tail]
 
-/-- The tensor inverse for `n + 1` coordinates is the Kronecker product of the one-coordinate
-inverse, for coordinate `0`, with the tensor inverse for the remaining `n` coordinates. -/
+/-- Splitting off the first coordinate, the tensor inverse is the Kronecker product of the
+one-coordinate inverse with the tensor inverse of the remaining coordinates. -/
 theorem fullInverse_fin_succ (n : ℕ) :
-    fullInverse (Fin (n + 1)) =
-      (coordInverse ⊗ₖ fullInverse (Fin n)).submatrix (Fin.consEquiv fun _ ↦ SignType).symm
-        (Fin.consEquiv fun _ ↦ Fin 3).symm := by
+    fullInverse (Fin (n + 1)) = (signInverse ⊗ₖ fullInverse (Fin n)).submatrix
+      (Fin.consEquiv fun _ => SignType).symm (Fin.consEquiv fun _ => Fin 3).symm := by
   ext σ e
   simp [Fin.prod_univ_succ, Fin.tail]
 
