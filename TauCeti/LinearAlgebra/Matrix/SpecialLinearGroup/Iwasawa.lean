@@ -71,10 +71,7 @@ private theorem det_eq_one_of_det_mul_mul_eq_one {k a u : GL (Fin n) ℝ}
     GeneralLinearGroup.det k = 1 ∧ GeneralLinearGroup.det a = 1 := by
   simp only [Units.ext_iff, GeneralLinearGroup.val_det_apply, Units.val_mul, det_mul,
     (UpperUnitriangularGroup.mem_iff.1 hu).det_eq_one, mul_one, Units.val_one] at h ⊢
-  obtain ⟨d, hd, had⟩ := mem_posDiagonalSubgroup_iff.1 ha
-  have ha₀ : 0 < (a : Matrix (Fin n) (Fin n) ℝ).det := by
-    rw [had, det_diagonal]
-    exact Finset.prod_pos fun i _ => hd i
+  have ha₀ := det_pos_of_mem_posDiagonalSubgroup ha
   -- `k kᵀ = 1`, so `det k` squares to one; it is positive since `det k * det a = 1`.
   have hk₂ : (k : Matrix (Fin n) (Fin n) ℝ).det * (k : Matrix (Fin n) (Fin n) ℝ).det = 1 := by
     simpa [det_transpose] using congrArg det (mem_unitarySubgroup_GL_iff.1 hk)
