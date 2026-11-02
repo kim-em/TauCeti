@@ -100,6 +100,7 @@ def puncturedClosedBall : Opens (closedBall (0 : E) 1) :=
 
 omit [InnerProductSpace ℝ E] in
 /-- A point of the closed unit ball lies in the punctured closed ball exactly when it is nonzero. -/
+@[simp]
 theorem mem_puncturedClosedBall {y : closedBall (0 : E) 1} :
     y ∈ puncturedClosedBall E ↔ (y : E) ≠ 0 :=
   Iff.rfl
@@ -115,7 +116,7 @@ theorem contMDiff_ballCollarInv {k : ℕ∞ω} :
     contMDiff_subtypeVal_closedBall.comp contMDiff_subtype_val
   have hnorm (y : puncturedClosedBall E) : ContMDiffAt (𝓡∂ (n + 1)) 𝓘(ℝ) k
       (fun y : puncturedClosedBall E ↦ ‖((y : closedBall (0 : E) 1) : E)‖) y :=
-    (contDiffAt_norm ℝ (show ((y : closedBall (0 : E) 1) : E) ≠ 0 from y.2)).comp_contMDiffAt
+    (contDiffAt_norm ℝ (mem_puncturedClosedBall.1 y.2)).comp_contMDiffAt
       (f := fun y : puncturedClosedBall E ↦ ((y : closedBall (0 : E) 1) : E)) hy.contMDiffAt
   refine ContMDiff.prodMk ?_ ?_
   · refine ContMDiff.codRestrict_sphere (fun y ↦ ?_) _
@@ -229,6 +230,7 @@ theorem ballCollarChart_symm_apply (y : EuclideanHalfSpace (n + 1)) :
 
 /-- A point lies in the target of the collar chart of `ψ` exactly when it corresponds to a point
 of the target of `ψ`. -/
+@[simp]
 theorem mem_ballCollarChart_target {y : EuclideanHalfSpace (n + 1)} :
     y ∈ (ballCollarChart ψ).target ↔
       (EuclideanHalfSpace.collarDiffeomorph (k := ⊤) n).symm y ∈ ψ.target := by
@@ -338,11 +340,12 @@ theorem isImmersionAt_of_comp_ballCollar_eventuallyEq {k : ℕ∞ω}
   -- normal-form codomain chart of `G`. In these charts `Φ` is the normal form of `G` transported
   -- along `collarAmbientEquiv`.
   obtain ⟨W, hWeq, hW, hqW⟩ := eventually_nhds_iff.1 hΦ
+  simp only [Function.comp_apply] at hWeq
   set dom := (ballCollarChart hG.domChart).restr (ballCollar '' W)
   set cod := ballCollarChart (E := E) hG.codChart
   have hsource {p} (hp : p ∈ W) (hpd : p ∈ hG.domChart.source) :
       Φ (ballCollar p) ∈ cod.source := by
-    rw [show Φ (ballCollar p) = ballCollar (G p) from hWeq p hp]
+    rw [hWeq p hp]
     exact mem_ballCollarChart_source.2 ⟨G p, hG.source_subset_preimage_source hpd, rfl⟩
   let equiv : (EuclideanSpace ℝ (Fin (m + 1)) × hG.complement) ≃L[ℝ]
       EuclideanSpace ℝ (Fin (n + 1)) :=
@@ -378,9 +381,8 @@ theorem isImmersionAt_of_comp_ballCollar_eventuallyEq {k : ℕ∞ω}
       rw [OpenPartialHomeomorph.extend_target']
       exact ⟨_, mem_ballCollarChart_target.1 hut.1,
         EuclideanHalfSpace.collarDiffeomorph_symm_apply_coe m u'⟩
-    rw [Function.comp_apply, Function.comp_apply, hsymm, show Φ (ballCollar p) =
-      ballCollar (G p) from hWeq p hp', ballCollarChart_extend_ballCollar_apply,
-      hG.writtenInCharts hv]
+    rw [Function.comp_apply, Function.comp_apply, hsymm, hWeq p hp',
+      ballCollarChart_extend_ballCollar_apply, hG.writtenInCharts hv]
     rfl
 
 /-- **A map that is a cone near a collar point is an immersion there.** Let `g` be a map of the
