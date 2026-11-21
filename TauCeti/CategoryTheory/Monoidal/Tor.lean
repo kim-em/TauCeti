@@ -40,8 +40,9 @@ If `e • 𝟙 X = 0` for a natural number `e`, then `e` kills every `Torₙ(X, 
 (`CategoryTheory.ObjectProperty.isKilledBy`) are closed under subobjects and quotients and contain
 every `X ⊗ P`.
 
-For a projective resolution `P` of `Y`, the functor `X ↦ X ⊗ P`
-(`CategoryTheory.tensorResolutionFunctor`) followed by homology in degree `n` is `Torₙ(-, Y)`
+For a complex `P`, tensoring its terms on the left gives a functor `X ↦ X ⊗ P` from `C` to
+complexes (`HomologicalComplex.objTensor`). For a projective resolution `P` of `Y`, this functor
+followed by homology in degree `n` is `Torₙ(-, Y)`
 (`CategoryTheory.ProjectiveResolution.torFlipObjIso`). Hence, when colimits of shape `J` are exact
 and preserved by tensoring on the right, `Torₙ(-, Y)` preserves colimits of shape `J`
 (`CategoryTheory.preservesColimitsOfShape_Tor_flip_obj`), and in
@@ -64,6 +65,39 @@ functor and hence exact.
 public section
 
 noncomputable section
+
+namespace HomologicalComplex
+
+open CategoryTheory Limits MonoidalCategory
+
+variable {C : Type*} [Category* C] [Preadditive C] [MonoidalCategory C] [MonoidalPreadditive C]
+  {ι : Type*} {c : ComplexShape ι} (P : HomologicalComplex C c)
+
+/-- The functor `X ↦ X ⊗ P` from `C` to complexes, tensoring every term of the complex `P` on the
+left with `X`: its terms are `X ⊗ P.X n` (`HomologicalComplex.objTensor_obj_X`), its differentials
+`X ◁ P.d i j` (`HomologicalComplex.objTensor_obj_d`), and it sends `f` to the maps `f ▷ P.X n`
+(`HomologicalComplex.objTensor_map_f`). -/
+-- The body is exposed: the component lemmas below are definitional, and
+-- `CategoryTheory.ProjectiveResolution.torFlipObjIso` identifies `objTensor` with
+-- `Functor.mapHomologicalComplex` of `tensoringLeft` by unfolding.
+@[expose, simps obj_X obj_d map_f]
+def objTensor : C ⥤ HomologicalComplex C c where
+  obj X :=
+    { X n := X ⊗ P.X n
+      d i j := X ◁ P.d i j
+      shape i j h := by rw [P.shape i j h, MonoidalPreadditive.whiskerLeft_zero]
+      d_comp_d' i j k _ _ := by
+        rw [← whiskerLeft_comp, P.d_comp_d, MonoidalPreadditive.whiskerLeft_zero] }
+  map f :=
+    { f n := f ▷ P.X n
+      comm' i j _ := (whisker_exchange _ _).symm }
+
+instance : P.objTensor.Additive where
+  map_add {_ _ f g} := by
+    ext
+    exact MonoidalPreadditive.add_whiskerRight f g
+
+end HomologicalComplex
 
 namespace CategoryTheory
 
@@ -147,19 +181,11 @@ lemma isZero_Tor'_succ_tensorUnit (X : C) (n : ℕ) :
       ShortComplex.exact_of_iso (S.mapNatIso (rightUnitorNatIso C)).symm hS
   exact Functor.isZero_leftDerived_succ _ X n
 
--- The body is exposed so that the terms and differentials of `X ⊗ P` can be computed by
--- unfolding, as for `Functor.mapHomologicalComplex`.
-/-- The functor sending `X` to the complex `X ⊗ P` for a projective resolution `P` of `Y`. -/
-@[expose, simps obj]
-def tensorResolutionFunctor {Y : C} (P : ProjectiveResolution Y) : C ⥤ ChainComplex C ℕ where
-  obj X := (((tensoringLeft C).obj X).mapHomologicalComplex _).obj P.complex
-  map f := (NatTrans.mapHomologicalComplex ((tensoringLeft C).map f) _).app P.complex
-
 /-- `Torₙ(-, Y)` is the homology in degree `n` of `X ↦ X ⊗ P` for a projective resolution `P` of
 `Y`: on each `X` this is `ProjectiveResolution.isoLeftDerivedObj`
 (`CategoryTheory.ProjectiveResolution.torFlipObjIso_hom_app`). -/
 def ProjectiveResolution.torFlipObjIso {Y : C} (P : ProjectiveResolution Y) (n : ℕ) :
-    (Tor C n).flip.obj Y ≅ tensorResolutionFunctor P ⋙ HomologicalComplex.homologyFunctor C _ n :=
+    (Tor C n).flip.obj Y ≅ P.complex.objTensor ⋙ HomologicalComplex.homologyFunctor C _ n :=
   NatIso.ofComponents (fun X ↦ P.isoLeftDerivedObj ((tensoringLeft C).obj X) n) fun {X₁ X₂} f ↦ by
     -- Unfold `Tor` to `leftDerived` of `tensoringLeft` so `isoLeftDerivedObj` cancels.
     change (NatTrans.leftDerived ((tensoringLeft C).map f) n).app Y ≫
@@ -183,7 +209,7 @@ instance preservesColimitsOfShape_Tor_flip_obj {J : Type*} [Category* J] [HasCol
     [HasExactColimitsOfShape J C] [∀ Z : C, PreservesColimitsOfShape J (tensorRight Z)] (Y : C)
     (n : ℕ) : PreservesColimitsOfShape J ((Tor C n).flip.obj Y) := by
   let P := projectiveResolution Y
-  have : PreservesColimitsOfShape J (tensorResolutionFunctor P) :=
+  have : PreservesColimitsOfShape J P.complex.objTensor :=
     HomologicalComplex.preservesColimitsOfShape_of_eval _ fun k ↦
       inferInstanceAs (PreservesColimitsOfShape J (tensorRight (P.complex.X k)))
   have : PreservesColimitsOfShape J

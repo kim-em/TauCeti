@@ -5,12 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
-public import Mathlib.Algebra.Category.ModuleCat.Projective
-public import Mathlib.RingTheory.Flat.CategoryTheory
-public import TauCeti.Algebra.Category.ModuleCat.AB
 public import TauCeti.Algebra.Homology.CartanEilenbergResolution
-public import TauCeti.Algebra.Homology.Monoidal.Homology.Connecting
 public import TauCeti.Algebra.Homology.Monoidal.Homology.Kunneth.Projective
 public import TauCeti.Algebra.Homology.TotalComplex.Basic
 
@@ -34,15 +29,18 @@ tensoring with a flat module is exact
 rows make the augmentation of the total complex a quasi-isomorphism
 (`HomologicalComplex₂.quasiIso_totalAugmentation_of_rows`).
 
-This bicomplex is the source of the Künneth spectral sequence. When every term of `K` is flat, the
-spectral sequence of its column filtration therefore converges to the homology of `K ⊗ L`. Since
+This bicomplex is the source of the Künneth spectral sequence, the spectral sequence of its column
+filtration, that is of the row filtration of the flipped bicomplex. It converges to the homology of
+the total complex (`HomologicalComplex₂.columnFiltrationAbutmentIso`), and when every term of `K` is
+flat the augmentation identifies this homology with that of `K ⊗ L`. Since
 the complexes `Q.X p` have projective terms and projective homology, the Künneth map
 `⨁_{i + j = k} Hᵢ(K) ⊗ Hⱼ(Q.X p) ⟶ H_k(K ⊗ Q.X p)` of each column is an isomorphism
 (`HomologicalComplex.kunnethColumnHomologyKunneth`), natural in the horizontal differentials
 (`HomologicalComplex.kunnethColumnHomologyKunneth_naturality`). This identifies the first page of
 the spectral sequence (E¹, `page 2` in the numbering of
 `HomologicalComplex₂.columnFiltrationSpectralSequence`). The page after it (E², `page 3`) is then
-`Tor`: the first differential is induced by the maps `Hⱼ(Q.d (p + 1) p)`, and for each `j` the
+`Tor`: in degree `k`, the first differential is `(-1)^k` times the map induced by the maps
+`Hⱼ(Q.d (p + 1) p)`, and for each `j` the
 complex `p ↦ Hⱼ(Q.X p)` is a projective resolution of `Hⱼ(L)`
 (`ChainComplex.cartanEilenbergResolution.homologyResolution`); see
 `TauCeti.Algebra.Homology.Monoidal.Homology.Kunneth.SpectralSequence`.
@@ -126,13 +124,13 @@ instance isIso_kunnethColumnHomologyKunneth (p k : ℕ) :
 /-- Naturality of `kunnethColumnHomologyKunneth` with respect to the horizontal differentials of
 the Künneth bicomplex. -/
 @[reassoc]
-lemma kunnethColumnHomologyKunneth_naturality (p k : ℕ) :
-    kunnethColumnHomologyKunneth K L (p + 1) k ≫
-        homologyMap ((kunnethBicomplex K L).d (p + 1) p) k =
+lemma kunnethColumnHomologyKunneth_naturality (p p' k : ℕ) :
+    kunnethColumnHomologyKunneth K L p k ≫
+        homologyMap ((kunnethBicomplex K L).d p p') k =
       GradedObject.Monoidal.whiskerLeft (fun i ↦ K.homology i)
-        (fun j ↦ homologyMap ((cartanEilenbergResolution L).d (p + 1) p) j) k ≫
-        kunnethColumnHomologyKunneth K L p k := by
-  have h := homologyKunneth_naturality (𝟙 K) ((cartanEilenbergResolution L).d (p + 1) p) k
+        (fun j ↦ homologyMap ((cartanEilenbergResolution L).d p p') j) k ≫
+        kunnethColumnHomologyKunneth K L p' k := by
+  have h := homologyKunneth_naturality (𝟙 K) ((cartanEilenbergResolution L).d p p') k
   simp only [homologyMap_id] at h
   -- `𝟙` of a graded object is the family of identities, `K ◁ f` is `tensorHom (𝟙 K) f`, and the
   -- columns and horizontal differentials of the Künneth bicomplex are `K ⊗ Q.X p` and `K ◁ Q.d`,
