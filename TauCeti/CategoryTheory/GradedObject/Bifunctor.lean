@@ -10,19 +10,16 @@ public import Mathlib.CategoryTheory.GradedObject.Bifunctor
 public import Mathlib.CategoryTheory.Limits.Shapes.Biproducts
 
 /-!
-# Coproducts of graded objects as biproducts
-
-Given a graded object `X : GradedObject I C` and a map `p : I → J`, the object `X.mapObj p j` is
-the coproduct of the `X i` with `p i = j`. When these objects have a biproduct, for instance when
-the fibre is finite and `C` has finite biproducts, it is this biproduct
-(`CategoryTheory.GradedObject.mapObjIsoBiproduct`).
+# Coproducts of bifunctors of graded objects as biproducts
 
 For graded objects indexed by a type with an addition and antidiagonals, such as `ℕ`, the fibre of
 the addition map over `n` is `Finset.antidiagonal n`
 (`CategoryTheory.GradedObject.fiberEquivAntidiagonal`). Reindexing the biproduct bicone along this
 equivalence (`CategoryTheory.Limits.Bicone.whiskerIsBilimitIff`) gives a colimit cofan over the
-fibre, so the coproduct over `i + j = n` defining `CategoryTheory.GradedObject.mapBifunctorMapObj`
-is the biproduct indexed by `Finset.antidiagonal n`
+fibre, which Mathlib's `CategoryTheory.GradedObject.CofanMapObjFun.iso` compares with the
+coproduct. So the coproduct over `i + j = n` defining
+`CategoryTheory.GradedObject.mapBifunctorMapObj` is the biproduct indexed by
+`Finset.antidiagonal n`
 (`CategoryTheory.GradedObject.mapBifunctorMapObjIsoBiproduct`). The tensor product of graded
 objects is a special case (`CategoryTheory.GradedObject.Monoidal.tensorObjIsoBiproduct`).
 -/
@@ -34,35 +31,6 @@ noncomputable section
 open CategoryTheory Limits
 
 namespace CategoryTheory.GradedObject
-
-section MapObj
-
-variable {I J C : Type*} [Category* C] [HasZeroMorphisms C] (X : GradedObject I C) (p : I → J)
-  [X.HasMap p] (j : J) [HasBiproduct (X.mapObjFun p j)]
-
-/-- The coproduct `X.mapObj p j` of the `X i` with `p i = j` is the biproduct of these objects. -/
-def mapObjIsoBiproduct : X.mapObj p j ≅ ⨁ X.mapObjFun p j :=
-  (CofanMapObjFun.iso (biproduct.isColimit (X.mapObjFun p j))).symm
-
-/-- `mapObjIsoBiproduct` sends the summand `X i` to the corresponding summand of the biproduct. -/
-@[reassoc (attr := simp)]
-lemma ιMapObj_mapObjIsoBiproduct_hom (i : I) (h : p i = j) :
-    X.ιMapObj p i j h ≫ (X.mapObjIsoBiproduct p j).hom =
-      biproduct.ι (X.mapObjFun p j) ⟨i, Set.mem_singleton_iff.2 h⟩ := by
-  rw [mapObjIsoBiproduct, Iso.symm_hom, CofanMapObjFun.ιMapObj_iso_inv]
-  simp
-
-/-- The inverse of `mapObjIsoBiproduct` sends each summand of the biproduct to the corresponding
-summand of `X.mapObj p j`. -/
-@[reassoc (attr := simp)]
-lemma ι_mapObjIsoBiproduct_inv (i : p ⁻¹' {j}) :
-    biproduct.ι (X.mapObjFun p j) i ≫ (X.mapObjIsoBiproduct p j).inv =
-      X.ιMapObj p i j (Set.mem_singleton_iff.1 i.property) := by
-  rw [mapObjIsoBiproduct, Iso.symm_inv]
-  simpa using CofanMapObjFun.inj_iso_hom (biproduct.isColimit (X.mapObjFun p j)) i.val
-    (Set.mem_singleton_iff.1 i.property)
-
-end MapObj
 
 section Antidiagonal
 
