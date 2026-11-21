@@ -6,9 +6,9 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.CategoryTheory.Monoidal.Tor
+public import TauCeti.Algebra.Homology.ComplexShape.Basic
 public import TauCeti.Algebra.Homology.Monoidal.Homology.Kunneth.CartanEilenberg
 public import TauCeti.Algebra.Homology.SpectralSequence.Bicomplex.FirstDifferential
-public import TauCeti.CategoryTheory.Limits.Shapes.Biproduct
 
 /-!
 # The Künneth spectral sequence
@@ -315,10 +315,6 @@ private lemma kunnethPageTwo_next (p q : ℕ) :
       (-(q : ℤ) - 2 * p + 2, (p : ℤ) - 1) :=
   (ComplexShape.up' _).next_eq' (Prod.ext (by dsimp) (by dsimp; omega))
 
-/-- In a chain complex indexed by `ℕ`, the successor of `p` is `p - 1`. -/
-private lemma down_nat_next (p : ℕ) : (ComplexShape.down ℕ).next p = p - 1 := by
-  cases p <;> simp
-
 /-- The third component of the comparison of the first page around column `p` with
 `kunnethTorSumComplex K L q`: zero for `p = 0`, where its source lies in column `-1` and so
 vanishes, and otherwise `(-1)^q` times the identification
@@ -414,7 +410,7 @@ def kunnethSpectralSequenceSecondPageXIso (p q : ℕ) :
       (kunnethPageTwo_prev p q) (kunnethPageTwo_next p q) ≪≫
     asIso (ShortComplex.homologyMap (kunnethSecondPageShortComplexHom K L p q)) ≪≫
     ((kunnethTorSumComplex K L q).homologyIsoSc' (p + 1) p (p - 1) (by simp)
-      (down_nat_next p)).symm ≪≫
+      (ChainComplex.next_nat p)).symm ≪≫
     kunnethTorSumComplexHomologyIso K L q p
 
 /-- **The second-page isomorphism on classes of cycles.** The class on the second page of a cycle
@@ -429,7 +425,7 @@ lemma homologyπ_kunnethSpectralSequenceSecondPageXIso_hom (p q : ℕ) :
         (kunnethSpectralSequenceSecondPageXIso K L p q).hom =
       (kunnethTorSumComplex K L q).liftCycles
           (((kunnethSpectralSequence K L).page 2).iCycles (-(q : ℤ) - 2 * p, p) ≫
-            (kunnethFirstPageXIsoTorSum K L p q).hom) (p - 1) (by cases p <;> simp)
+            (kunnethFirstPageXIsoTorSum K L p q).hom) (p - 1) (ChainComplex.next_nat p)
           (by rw [Category.assoc, iCycles_kunnethFirstPageXIsoTorSum_hom_d]) ≫
         (kunnethTorSumComplex K L q).homologyπ p ≫
           (kunnethTorSumComplexHomologyIso K L q p).hom := by
@@ -437,10 +433,10 @@ lemma homologyπ_kunnethSpectralSequenceSecondPageXIso_hom (p q : ℕ) :
         (kunnethPageTwo_prev p q) (kunnethPageTwo_next p q)).hom ≫
       ShortComplex.cyclesMap (kunnethSecondPageShortComplexHom K L p q) ≫
       ((kunnethTorSumComplex K L q).cyclesIsoSc' (p + 1) p (p - 1) (by simp)
-        (down_nat_next p)).inv =
+        (ChainComplex.next_nat p)).inv =
       (kunnethTorSumComplex K L q).liftCycles
         (((kunnethSpectralSequence K L).page 2).iCycles (-(q : ℤ) - 2 * p, p) ≫
-          (kunnethFirstPageXIsoTorSum K L p q).hom) (p - 1) (down_nat_next p)
+          (kunnethFirstPageXIsoTorSum K L p q).hom) (p - 1) (ChainComplex.next_nat p)
         (by rw [Category.assoc, iCycles_kunnethFirstPageXIsoTorSum_hom_d]) := by
     rw [← cancel_mono ((kunnethTorSumComplex K L q).iCycles p)]
     simp [kunnethSecondPageShortComplexHom_τ₂]
