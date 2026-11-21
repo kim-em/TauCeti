@@ -5,10 +5,10 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.CategoryTheory.Monoidal.Tor
 public import TauCeti.Algebra.Homology.ComplexShape.Basic
 public import TauCeti.Algebra.Homology.Monoidal.Homology.Kunneth.CartanEilenberg
 public import TauCeti.Algebra.Homology.SpectralSequence.Bicomplex.FirstDifferential
+public import TauCeti.CategoryTheory.Monoidal.Tor
 
 /-!
 # The Künneth spectral sequence
@@ -126,12 +126,12 @@ attribute [local instance] Abelian.hasFiniteBiproducts
 
 /-- The complex `p ↦ Hᵢ(K) ⊗ Hⱼ(Q.X p)`: the projective resolution
 `ChainComplex.cartanEilenbergResolution.homologyResolution L j` of `Hⱼ(L)`, tensored on the left
-with `Hᵢ(K)`. Its terms are described by `HomologicalComplex.kunnethTorComplexXIso`, its
-differential by `HomologicalComplex.kunnethTorComplexXIso_inv_d`, and its homology, which is
-`Tor (Hᵢ(K)) (Hⱼ(L))`, by `HomologicalComplex.kunnethTorComplexHomologyIso`. -/
+with `Hᵢ(K)` (`CategoryTheory.tensorResolutionFunctor`). Its terms are described by
+`HomologicalComplex.kunnethTorComplexXIso`, its differential by
+`HomologicalComplex.kunnethTorComplexXIso_inv_d`, and its homology, which is `Tor (Hᵢ(K)) (Hⱼ(L))`,
+by `HomologicalComplex.kunnethTorComplexHomologyIso`. -/
 def kunnethTorComplex (i j : ℕ) : ChainComplex (ModuleCat.{u} R) ℕ :=
-  (((tensoringLeft _).obj (K.homology i)).mapHomologicalComplex _).obj
-    (homologyResolution L j).complex
+  (tensorResolutionFunctor (homologyResolution L j)).obj (K.homology i)
 
 /-- The direct sum over `i + j = q` of the complexes `kunnethTorComplex K L i j`, with inclusions
 `HomologicalComplex.kunnethTorSumComplexι`. Under the identifications
@@ -226,17 +226,14 @@ lemma tensorObjIsoKunnethTorSumComplexX_hom_d (q p : ℕ) :
   rw [ιTensorObj_tensorObjIsoKunnethTorSumComplexX_hom, kunnethTorComplexXIso_inv_d_assoc,
     Pi.id_apply, id_tensorHom]
 
--- `kunnethTorComplex` is not exposed, and `Tor` is the left derived functor of the tensor product
--- only by unfolding `CategoryTheory.Tor`, so `ProjectiveResolution.isoLeftDerivedObj` does not
--- have this type syntactically.
 /-- The homology of `kunnethTorComplex K L i j` in degree `p` is `Torₚ(Hᵢ(K), Hⱼ(L))`, computed by
-the projective resolution `ChainComplex.cartanEilenbergResolution.homologyResolution L j`: it is
-the inverse of `ProjectiveResolution.isoLeftDerivedObj` for that resolution. -/
+the projective resolution `ChainComplex.cartanEilenbergResolution.homologyResolution L j`: it is the
+inverse of the component at `Hᵢ(K)` of `CategoryTheory.ProjectiveResolution.torFlipObjIso`. -/
 def kunnethTorComplexHomologyIso (i j p : ℕ) :
     (HomologicalComplex.homologyFunctor _ _ p).obj (kunnethTorComplex K L i j) ≅
       ((Tor (ModuleCat.{u} R) p).obj (K.homology i)).obj (L.homology j) :=
-  -- `Tor` is by definition the left derived functor of the tensor product in the second variable
-  ((homologyResolution L j).isoLeftDerivedObj ((tensoringLeft _).obj (K.homology i)) p).symm
+  -- `kunnethTorComplex K L i j` is by definition `tensorResolutionFunctor` applied to `Hᵢ(K)`
+  (((homologyResolution L j).torFlipObjIso p).app (K.homology i)).symm
 
 /-- The homology of `kunnethTorSumComplex K L q` in degree `p` is
 `⨁_{i + j = q} Torₚ(Hᵢ(K), Hⱼ(L))`. -/

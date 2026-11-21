@@ -760,7 +760,7 @@ theorem finrank_tensorObj [Nontrivial k] (n : I) :
       ∑ x ∈ Finset.antidiagonal n, Module.finrank k (A x.1) * Module.finrank k (B x.2) := by
   classical
   let P := (fun x : I × I ↦ x.1 + x.2) ⁻¹' {n}
-  let e : P ≃ Finset.antidiagonal n := fiberEquivAntidiagonal n
+  let e : P ≃ Finset.antidiagonal n := Equiv.subtypeEquivRight fun x ↦ by simp [P]
   have := Fintype.ofEquiv _ e.symm
   let ε := (Fintype.equivFin P).symm
   -- The degree `n` part of the tensor product is by definition the coproduct of the summands.
@@ -772,8 +772,6 @@ theorem finrank_tensorObj [Nontrivial k] (n : I) :
       ModuleCat.coprodIsoDirectSum fun j ↦ A (ε j).val.1 ⊗ B (ε j).val.2
   rw [iso.toLinearEquiv.finrank_eq, Module.finrank_directSum,
     ← Finset.sum_coe_sort (Finset.antidiagonal n)]
-  exact Fintype.sum_equiv (ε.trans e) _ _ fun x ↦ by
-    rw [Equiv.trans_apply, coe_fiberEquivAntidiagonal_apply]
-    exact Module.finrank_tensorProduct
+  exact Fintype.sum_equiv (ε.trans e) _ _ fun x ↦ Module.finrank_tensorProduct
 
 end CategoryTheory.GradedObject.Monoidal
