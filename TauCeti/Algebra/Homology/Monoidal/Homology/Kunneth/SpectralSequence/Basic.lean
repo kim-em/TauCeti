@@ -18,7 +18,8 @@ sequence of the column filtration of the Künneth bicomplex
 `HomologicalComplex.kunnethBicomplex K L`, whose column `p` is `K ⊗ Q.X p`. When every term of `K`
 is flat, its total complex computes `K ⊗ L`
 (`HomologicalComplex.quasiIso_kunnethBicomplexAugmentation`). This file computes its first page and
-first differential, without any flatness assumption.
+first differential, without any flatness assumption; the second page is identified with `Tor` in
+`TauCeti.Algebra.Homology.Monoidal.Homology.Kunneth.SpectralSequence.SecondPage`.
 
 Pages are numbered as in `HomologicalComplex₂.columnFiltrationSpectralSequence`: the first page
 (`E¹`) is `page 2` and the second page (`E²`) is `page 3`, and the object at column `p` and degree

@@ -42,8 +42,9 @@ the spectral sequence (E¹, `page 2` in the numbering of
 is `(-1)^k` times the map induced by the maps `Hⱼ(Q.d (p + 1) p)`; see
 `TauCeti.Algebra.Homology.Monoidal.Homology.Kunneth.SpectralSequence.Basic`. For each `j` the
 complex `p ↦ Hⱼ(Q.X p)` is a projective resolution of `Hⱼ(L)`
-(`ChainComplex.cartanEilenbergResolution.homologyResolution`), which relates the second page to
-`Tor`.
+(`ChainComplex.cartanEilenbergResolution.homologyResolution`), so the term of the second page
+(E², `page 3`) in column `p`, degree `k` is `⨁_{i + j = k} Torₚ(Hᵢ(K), Hⱼ(L))`
+(`HomologicalComplex.kunnethSpectralSequenceSecondPageXIso`).
 
 ## References
 

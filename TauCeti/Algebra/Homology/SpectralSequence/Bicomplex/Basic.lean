@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.Homology.ComplexShape.Basic
 public import TauCeti.Algebra.Homology.Embedding.ExtendHomology.Sequence
 public import TauCeti.Algebra.Homology.SpectralSequence.Filtered.Convergence
 public import TauCeti.Algebra.Homology.TotalComplex.Basic
@@ -561,6 +562,24 @@ lemma columnFiltrationSpectralSequenceFirstPageXIso_eq (p k : ℕ) :
       K.flip.rowFiltrationSpectralSequenceFirstPageXIso (-(k : ℤ) - 2 * p) p k (by omega) ≪≫
         HomologicalComplex.homologyMapIso (K.flipRowIso p) k :=
   (rfl)
+
+/-- On the first page (numbered `2`) of the column-filtration spectral sequence, the predecessor of
+the position `(-k - 2p, p)` of column `p`, degree `k`, is the position of column `p + 1`,
+degree `k`. -/
+lemma columnFiltrationSpectralSequence_page_two_prev (p k : ℕ) :
+    (ComplexShape.up' ((2, 1 - 2) : ℤ × ℤ)).prev (-(k : ℤ) - 2 * p, (p : ℤ)) =
+      (-(k : ℤ) - 2 * ((p + 1 : ℕ) : ℤ), ((p + 1 : ℕ) : ℤ)) := by
+  rw [TauCeti.up'_prev]
+  ext <;> simp only [Prod.fst_sub, Prod.snd_sub] <;> push_cast <;> ring
+
+/-- On the first page (numbered `2`) of the column-filtration spectral sequence, the successor of
+the position `(-k - 2p, p)` of column `p`, degree `k`, is `(-k - 2p + 2, p - 1)`, the position of
+column `p - 1`, degree `k` when `p ≥ 1`. -/
+lemma columnFiltrationSpectralSequence_page_two_next (p k : ℕ) :
+    (ComplexShape.up' ((2, 1 - 2) : ℤ × ℤ)).next (-(k : ℤ) - 2 * p, (p : ℤ)) =
+      (-(k : ℤ) - 2 * p + 2, (p : ℤ) - 1) := by
+  rw [TauCeti.up'_next]
+  exact Prod.ext (by simp only [Prod.fst_add]) (by simp only [Prod.snd_add]; ring)
 
 /-- The identification of a row of the flipped bicomplex with a column of `K` is the identity in
 each degree. -/

@@ -1,0 +1,385 @@
+/-
+Copyright (c) 2026 The Tau Ceti contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The Tau Ceti contributors
+-/
+module
+
+public import TauCeti.Algebra.Homology.Monoidal.Homology.Kunneth.SpectralSequence.Basic
+public import TauCeti.CategoryTheory.Monoidal.Tor
+
+/-!
+# The second page of the Künneth spectral sequence
+
+Let `K` and `L` be chain complexes of modules over a commutative ring `R`, indexed by `ℕ`, and let
+`Q` be the Cartan–Eilenberg resolution of `L`. This file identifies the second page of the Künneth
+spectral sequence `HomologicalComplex.kunnethSpectralSequence K L` with `Tor`, without any flatness
+assumption. Pages are numbered as in `HomologicalComplex₂.columnFiltrationSpectralSequence`: the
+second page (`E²`) is `page 3`, and the object at column `p` and degree `q` sits at `(-q - 2p, p)`.
+
+For each `j`, the complex `p ↦ Hⱼ(Q.X p)` is the projective resolution
+`ChainComplex.cartanEilenbergResolution.homologyResolution L j` of `Hⱼ(L)`, so by the description of
+the first page and its differential
+(`HomologicalComplex.kunnethSpectralSequenceFirstPageXIso`,
+`HomologicalComplex.kunnethSpectralSequence_page_two_d`) the row of the first page in degree `q` is,
+up to the sign `(-1)^q` of its differential, the direct sum over `i + j = q` of the complexes
+`Hᵢ(K) ⊗ Hⱼ(Q.X •)` (`HomologicalComplex.kunnethTorSumComplex`) computing `Tor (Hᵢ(K)) (Hⱼ(L))`.
+Hence the second page at column `p`, degree `q` is `⨁_{i + j = q} Torₚ(Hᵢ(K), Hⱼ(L))`
+(`HomologicalComplex.kunnethSpectralSequenceSecondPageXIso`), with `Tor` derived in the second
+variable as in Mathlib's `CategoryTheory.Tor`. As for `HomologicalComplex.homologyTor`, this sum is
+the graded object `GradedObject.mapBifunctorMapObj (Tor _ p) (fun x ↦ x.1 + x.2)`. The second-page
+isomorphism sends the class of a cycle `z` of the first page to the class of the corresponding
+cycle of `HomologicalComplex.kunnethTorSumComplex K L q`, followed by the identification
+`HomologicalComplex.kunnethTorSumComplexHomologyIso` of its homology with `⨁ Tor`
+(`HomologicalComplex.homologyπ_kunnethSpectralSequenceSecondPageXIso_hom`). That last
+identification is described on each summand by
+`HomologicalComplex.homologyMap_kunnethTorSumComplexι_kunnethTorSumComplexHomologyIso_hom`.
+
+## References
+
+* C. A. Weibel, *An Introduction to Homological Algebra*, Cambridge University Press, 1994,
+  Theorem 5.6.4 (the Künneth spectral sequence) and Section 5.7 (Cartan–Eilenberg resolutions).
+* J. McCleary, *A User's Guide to Spectral Sequences*, 2nd ed., Cambridge University Press, 2001,
+  Theorem 2.20 (the algebraic Künneth spectral sequence).
+-/
+
+public section
+
+noncomputable section
+
+open CategoryTheory Limits MonoidalCategory ChainComplex cartanEilenbergResolution
+
+universe u
+
+namespace HomologicalComplex
+
+variable {R : Type u} [CommRing R] (K L : ChainComplex (ModuleCat.{u} R) ℕ)
+
+attribute [local instance] Abelian.hasFiniteBiproducts
+
+/-- The complex `p ↦ Hᵢ(K) ⊗ Hⱼ(Q.X p)`: the projective resolution
+`ChainComplex.cartanEilenbergResolution.homologyResolution L j` of `Hⱼ(L)`, tensored on the left
+with `Hᵢ(K)` (`HomologicalComplex.objTensor`). Its terms are described by
+`HomologicalComplex.kunnethTorComplexXIso`, its differential by
+`HomologicalComplex.kunnethTorComplexXIso_inv_d`, and its homology, which is `Tor (Hᵢ(K)) (Hⱼ(L))`,
+by `HomologicalComplex.kunnethTorComplexHomologyIso`. -/
+def kunnethTorComplex (i j : ℕ) : ChainComplex (ModuleCat.{u} R) ℕ :=
+  (homologyResolution L j).complex.objTensor.obj (K.homology i)
+
+/-- The direct sum over `i + j = q` of the complexes `kunnethTorComplex K L i j`, with inclusions
+`HomologicalComplex.kunnethTorSumComplexι`. Under the identifications
+`HomologicalComplex.kunnethFirstPageXIsoTorSum`, it is the row of the first page of the Künneth
+spectral sequence in degree `q`, up to the sign `(-1)^q` of its differential. -/
+def kunnethTorSumComplex (q : ℕ) : ChainComplex (ModuleCat.{u} R) ℕ :=
+  ⨁ fun x : Finset.antidiagonal q ↦ kunnethTorComplex K L x.val.1 x.val.2
+
+-- Composites of isomorphisms through `⨁` and through `kunnethTorSumComplex K L q` are type
+-- correct only after unfolding `kunnethTorSumComplex`, which `simp` does not do, so this identity
+-- comparison keeps them rewritable.
+/-- `kunnethTorSumComplex K L q` is the biproduct of the complexes `kunnethTorComplex K L i j`. -/
+private def kunnethTorSumComplexIsoBiproduct (q : ℕ) :
+    kunnethTorSumComplex K L q ≅
+      ⨁ fun x : Finset.antidiagonal q ↦ kunnethTorComplex K L x.val.1 x.val.2 :=
+  -- by definition of `kunnethTorSumComplex`
+  Iso.refl _
+
+/-- The inclusion of the summand `kunnethTorComplex K L i j` into `kunnethTorSumComplex K L q`, for
+`i + j = q`. -/
+def kunnethTorSumComplexι (q i j : ℕ) (h : i + j = q) :
+    kunnethTorComplex K L i j ⟶ kunnethTorSumComplex K L q :=
+  biproduct.ι (fun x : Finset.antidiagonal q ↦ kunnethTorComplex K L x.val.1 x.val.2)
+      ⟨(i, j), Finset.mem_antidiagonal.2 h⟩ ≫ (kunnethTorSumComplexIsoBiproduct K L q).inv
+
+/-- The inclusion `kunnethTorSumComplexι` is the inclusion of a summand of the biproduct. -/
+private lemma kunnethTorSumComplexι_eq (q i j : ℕ) (h : i + j = q) :
+    kunnethTorSumComplexι K L q i j h =
+      biproduct.ι (fun x : Finset.antidiagonal q ↦ kunnethTorComplex K L x.val.1 x.val.2)
+        ⟨(i, j), Finset.mem_antidiagonal.2 h⟩ ≫ (kunnethTorSumComplexIsoBiproduct K L q).inv :=
+  (rfl)
+
+/-- The cofan of the inclusions `HomologicalComplex.kunnethTorSumComplexι` of the summands of
+`kunnethTorSumComplex K L q`. It is a colimit
+(`HomologicalComplex.isColimitKunnethTorSumComplexCofan`). -/
+abbrev kunnethTorSumComplexCofan (q : ℕ) :
+    Cofan fun x : Finset.antidiagonal q ↦ kunnethTorComplex K L x.val.1 x.val.2 :=
+  Cofan.mk (kunnethTorSumComplex K L q) fun x ↦
+    kunnethTorSumComplexι K L q x.val.1 x.val.2 (Finset.mem_antidiagonal.1 x.property)
+
+/-- `kunnethTorSumComplex K L q` is the coproduct of the complexes `kunnethTorComplex K L i j`
+with `i + j = q`, with inclusions `HomologicalComplex.kunnethTorSumComplexι`. -/
+def isColimitKunnethTorSumComplexCofan (q : ℕ) : IsColimit (kunnethTorSumComplexCofan K L q) :=
+  IsColimit.ofIsoColimit (biproduct.isColimit _)
+    (Cofan.ext (kunnethTorSumComplexIsoBiproduct K L q).symm fun x ↦ by
+      simp [kunnethTorSumComplexι_eq])
+
+-- `kunnethTorComplex` is not exposed, so its terms are only available through
+-- `kunnethTorComplexXIso`.
+/-- In degree `p`, the complex `kunnethTorComplex K L i j` is `Hᵢ(K) ⊗ Hⱼ(Q.X p)`. -/
+def kunnethTorComplexXIso (i j p : ℕ) :
+    (kunnethTorComplex K L i j).X p ≅
+      K.homology i ⊗ ((cartanEilenbergResolution L).X p).homology j :=
+  -- the term of `homologyResolution L j` in degree `p` is `Hⱼ(Q.X p)` by definition
+  (homologyResolution L j).complex.objTensorXIso (K.homology i) p
+
+/-- The differential of `kunnethTorComplex K L i j` is `Hᵢ(K)` tensored with the map induced on
+`Hⱼ` by the differential of the Cartan–Eilenberg resolution. -/
+@[reassoc]
+lemma kunnethTorComplexXIso_inv_d (i j p p' : ℕ) :
+    (kunnethTorComplexXIso K L i j p).inv ≫ (kunnethTorComplex K L i j).d p p' =
+      K.homology i ◁ homologyMap ((cartanEilenbergResolution L).d p p') j ≫
+        (kunnethTorComplexXIso K L i j p').inv := by
+  -- the differential of `homologyResolution L j` is by definition the map induced on `Hⱼ` by the
+  -- differential of `Q`
+  exact (homologyResolution L j).complex.objTensorXIso_inv_d (K.homology i) p p'
+
+/-- The terms of `kunnethTorSumComplex K L q` are the graded tensor products
+`⨁_{i + j = q} Hᵢ(K) ⊗ Hⱼ(Q.X p)`. -/
+def tensorObjIsoKunnethTorSumComplexX (q p : ℕ) :
+    GradedObject.Monoidal.tensorObj (fun i ↦ K.homology i)
+        (fun j ↦ ((cartanEilenbergResolution L).X p).homology j) q ≅
+      (kunnethTorSumComplex K L q).X p :=
+  GradedObject.Monoidal.tensorObjIsoBiproduct _ _ q ≪≫
+    biproduct.mapIso (g := (HomologicalComplex.eval _ _ p).obj ∘
+        fun x : Finset.antidiagonal q ↦ kunnethTorComplex K L x.val.1 x.val.2)
+      (fun x ↦ (kunnethTorComplexXIso K L x.val.1 x.val.2 p).symm) ≪≫
+    ((HomologicalComplex.eval _ _ p).mapBiproduct _).symm ≪≫
+    (HomologicalComplex.eval _ _ p).mapIso (kunnethTorSumComplexIsoBiproduct K L q).symm
+
+/-- On the summand `Hᵢ(K) ⊗ Hⱼ(Q.X p)`, the identification
+`HomologicalComplex.tensorObjIsoKunnethTorSumComplexX` is the inclusion
+`HomologicalComplex.kunnethTorSumComplexι` in degree `p`. -/
+@[reassoc (attr := simp)]
+lemma ιTensorObj_tensorObjIsoKunnethTorSumComplexX_hom (q p i j : ℕ) (h : i + j = q) :
+    GradedObject.Monoidal.ιTensorObj (fun i ↦ K.homology i)
+        (fun j ↦ ((cartanEilenbergResolution L).X p).homology j) i j q h ≫
+      (tensorObjIsoKunnethTorSumComplexX K L q p).hom =
+    (kunnethTorComplexXIso K L i j p).inv ≫ (kunnethTorSumComplexι K L q i j h).f p := by
+  simp only [tensorObjIsoKunnethTorSumComplexX, Iso.trans_hom, Iso.symm_hom, biproduct.mapIso_hom,
+    GradedObject.Monoidal.ι_tensorObjIsoBiproduct_hom_assoc, biproduct.ι_map_assoc,
+    Functor.mapIso_hom, kunnethTorSumComplexι_eq, comp_f]
+  -- `(F.mapBiproduct f).inv` is by definition the comparison `biproductComparison' F f`, and
+  -- evaluation in degree `p` sends a chain map to its component in degree `p`
+  exact congrArg (_ ≫ ·)
+    (Functor.ι_biproductComparison'_assoc (HomologicalComplex.eval _ _ p) _ _ _)
+
+/-- Under the identifications `HomologicalComplex.tensorObjIsoKunnethTorSumComplexX`, the
+differential of `kunnethTorSumComplex K L q` is induced by the maps `homologyMap (Q.d p p') j`. -/
+@[reassoc]
+lemma tensorObjIsoKunnethTorSumComplexX_hom_d (q p p' : ℕ) :
+    (tensorObjIsoKunnethTorSumComplexX K L q p).hom ≫ (kunnethTorSumComplex K L q).d p p' =
+      GradedObject.Monoidal.whiskerLeft (fun i ↦ K.homology i)
+          (fun j ↦ homologyMap ((cartanEilenbergResolution L).d p p') j) q ≫
+        (tensorObjIsoKunnethTorSumComplexX K L q p').hom := by
+  refine GradedObject.Monoidal.tensorObj_ext _ _ fun i j h ↦ ?_
+  simp only [ιTensorObj_tensorObjIsoKunnethTorSumComplexX_hom_assoc, Hom.comm,
+    GradedObject.Monoidal.ι_tensorHom_assoc]
+  rw [ιTensorObj_tensorObjIsoKunnethTorSumComplexX_hom, kunnethTorComplexXIso_inv_d_assoc,
+    Pi.id_apply, id_tensorHom]
+
+/-- The homology of `kunnethTorComplex K L i j` in degree `p` is `Torₚ(Hᵢ(K), Hⱼ(L))`, computed by
+the projective resolution `ChainComplex.cartanEilenbergResolution.homologyResolution L j`: it is the
+inverse of the component at `Hᵢ(K)` of `CategoryTheory.ProjectiveResolution.torFlipObjIso`. -/
+def kunnethTorComplexHomologyIso (i j p : ℕ) :
+    (HomologicalComplex.homologyFunctor _ _ p).obj (kunnethTorComplex K L i j) ≅
+      ((Tor (ModuleCat.{u} R) p).obj (K.homology i)).obj (L.homology j) :=
+  -- `kunnethTorComplex K L i j` is by definition `objTensor` applied to `Hᵢ(K)`
+  (((homologyResolution L j).torFlipObjIso p).app (K.homology i)).symm
+
+/-- The homology of `kunnethTorSumComplex K L q` in degree `p` is
+`⨁_{i + j = q} Torₚ(Hᵢ(K), Hⱼ(L))`. -/
+def kunnethTorSumComplexHomologyIso (q p : ℕ) :
+    (kunnethTorSumComplex K L q).homology p ≅
+      GradedObject.mapBifunctorMapObj (Tor (ModuleCat.{u} R) p) (fun x ↦ x.1 + x.2)
+        (fun i ↦ K.homology i) (fun j ↦ L.homology j) q :=
+  (HomologicalComplex.homologyFunctor _ _ p).mapIso (kunnethTorSumComplexIsoBiproduct K L q) ≪≫
+    (HomologicalComplex.homologyFunctor _ _ p).mapBiproduct _ ≪≫
+    biproduct.mapIso (fun x ↦ kunnethTorComplexHomologyIso K L x.val.1 x.val.2 p) ≪≫
+    (GradedObject.mapBifunctorMapObjIsoBiproduct (fun i ↦ K.homology i) (fun j ↦ L.homology j)
+      (Tor (ModuleCat.{u} R) p) q).symm
+
+/-- On the summand `kunnethTorComplex K L i j`, the identification
+`HomologicalComplex.kunnethTorSumComplexHomologyIso` is
+`HomologicalComplex.kunnethTorComplexHomologyIso`, followed by the inclusion of the summand. -/
+@[reassoc (attr := simp)]
+lemma homologyMap_kunnethTorSumComplexι_kunnethTorSumComplexHomologyIso_hom (q p i j : ℕ)
+    (h : i + j = q) :
+    homologyMap (kunnethTorSumComplexι K L q i j h) p ≫
+      (kunnethTorSumComplexHomologyIso K L q p).hom =
+    (kunnethTorComplexHomologyIso K L i j p).hom ≫
+      GradedObject.ιMapBifunctorMapObj (Tor (ModuleCat.{u} R) p) (fun x ↦ x.1 + x.2)
+        (fun i ↦ K.homology i) (fun j ↦ L.homology j) i j q h := by
+  -- `(F.mapBiproduct f).inv` is by definition the comparison `biproductComparison' F f`
+  have hι := (Iso.eq_comp_inv ((HomologicalComplex.homologyFunctor _ _ p).mapBiproduct
+    fun x : Finset.antidiagonal q ↦ kunnethTorComplex K L x.val.1 x.val.2)).1
+    (Functor.ι_biproductComparison' _ _ ⟨(i, j), Finset.mem_antidiagonal.2 h⟩).symm
+  rw [kunnethTorSumComplexι_eq, homologyMap_comp]
+  simp only [kunnethTorSumComplexHomologyIso, Iso.trans_hom, Iso.symm_hom, biproduct.mapIso_hom,
+    Functor.mapIso_hom, homologyFunctor_map, Category.assoc, ← homologyMap_comp_assoc,
+    Iso.inv_hom_id, homologyMap_id, Category.id_comp]
+  rw [← homologyFunctor_map, reassoc_of% hι, biproduct.ι_map_assoc,
+    GradedObject.ι_mapBifunctorMapObjIsoBiproduct_inv (fun i ↦ K.homology i)
+      (fun j ↦ L.homology j) (Tor (ModuleCat.{u} R) p)]
+
+/-- The identification of the first page of the Künneth spectral sequence at column `p`,
+degree `q`, with the term of `kunnethTorSumComplex K L q` in degree `p`. -/
+def kunnethFirstPageXIsoTorSum (p q : ℕ) :
+    ((kunnethSpectralSequence K L).page 2).X (-(q : ℤ) - 2 * p, p) ≅
+      (kunnethTorSumComplex K L q).X p :=
+  kunnethSpectralSequenceFirstPageXIso K L p q ≪≫ tensorObjIsoKunnethTorSumComplexX K L q p
+
+/-- The identification `kunnethFirstPageXIsoTorSum` is the identification of the first page with
+the graded tensor object, followed by `tensorObjIsoKunnethTorSumComplexX`. -/
+lemma kunnethFirstPageXIsoTorSum_eq (p q : ℕ) :
+    kunnethFirstPageXIsoTorSum K L p q =
+      kunnethSpectralSequenceFirstPageXIso K L p q ≪≫ tensorObjIsoKunnethTorSumComplexX K L q p :=
+  (rfl)
+
+/-- Under the identifications `HomologicalComplex.kunnethFirstPageXIsoTorSum`, the first
+differential of the Künneth spectral sequence in degree `q` is `(-1)^q` times the differential of
+`kunnethTorSumComplex K L q`. -/
+@[reassoc]
+lemma kunnethSpectralSequence_page_two_d_kunnethFirstPageXIsoTorSum (p q : ℕ) :
+    ((kunnethSpectralSequence K L).page 2).d
+        (-(q : ℤ) - 2 * ((p + 1 : ℕ) : ℤ), (p + 1 : ℕ)) (-(q : ℤ) - 2 * p, p) ≫
+      (kunnethFirstPageXIsoTorSum K L p q).hom =
+    ((-1 : ℤ) ^ q) • ((kunnethFirstPageXIsoTorSum K L (p + 1) q).hom ≫
+      (kunnethTorSumComplex K L q).d (p + 1) p) := by
+  have h := kunnethSpectralSequence_page_two_d K L p q
+  rw [Iso.inv_comp_eq] at h
+  simp only [kunnethFirstPageXIsoTorSum_eq, Iso.trans_hom, Category.assoc,
+    tensorObjIsoKunnethTorSumComplexX_hom_d]
+  rw [reassoc_of% h, Preadditive.zsmul_comp, Preadditive.comp_zsmul]
+
+/-- The third component of the comparison of the first page around column `p` with
+`kunnethTorSumComplex K L q`: zero for `p = 0`, where its source lies in column `-1` and so
+vanishes, and otherwise `(-1)^q` times the identification
+`HomologicalComplex.kunnethFirstPageXIsoTorSum` at `p - 1`. -/
+private def kunnethSecondPageτ₃ (q : ℕ) : (p : ℕ) →
+    (((kunnethSpectralSequence K L).page 2).X (-(q : ℤ) - 2 * p + 2, (p : ℤ) - 1) ⟶
+      (kunnethTorSumComplex K L q).X (p - 1))
+  | 0 => 0
+  | s + 1 => (((-1 : ℤˣ) ^ q) • (((kunnethSpectralSequence K L).page 2).XIsoOfEq
+      (Prod.ext (by omega) (by omega)) ≪≫ kunnethFirstPageXIsoTorSum K L s q ≪≫
+      (kunnethTorSumComplex K L q).XIsoOfEq (by omega))).hom
+
+/-- The third component `kunnethSecondPageτ₃` is a monomorphism: its source is zero for `p = 0`,
+and it is an isomorphism otherwise. -/
+private instance (q p : ℕ) : Mono (kunnethSecondPageτ₃ K L q p) := by
+  cases p with
+  | zero =>
+    refine ⟨fun _ _ _ ↦ IsZero.eq_of_tgt ?_ _ _⟩
+    exact (kunnethBicomplex K L).flip.isZero_rowFiltrationSpectralSequence_page_two_X_of_neg _ _
+      (by omega)
+  | succ s => exact inferInstanceAs (Mono (((-1 : ℤˣ) ^ q) • _ : _ ≅ _).hom)
+
+/-- The differential of `kunnethTorSumComplex K L q` leaving degree `p`, transported to the first
+page, is the differential of the first page followed by `kunnethSecondPageτ₃`. -/
+private lemma kunnethFirstPageXIsoTorSum_hom_d (p q : ℕ) :
+    (kunnethFirstPageXIsoTorSum K L p q).hom ≫ (kunnethTorSumComplex K L q).d p (p - 1) =
+      ((kunnethSpectralSequence K L).page 2).d (-(q : ℤ) - 2 * p, p)
+        (-(q : ℤ) - 2 * p + 2, (p : ℤ) - 1) ≫ kunnethSecondPageτ₃ K L q p := by
+  cases p with
+  | zero =>
+    rw [(kunnethTorSumComplex K L q).shape _ _ (by simp), comp_zero]
+    simp only [kunnethSecondPageτ₃, comp_zero]
+  | succ s =>
+    simp only [kunnethSecondPageτ₃, Preadditive.smul_iso_hom, Units.smul_def, Iso.trans_hom,
+      Preadditive.comp_zsmul, d_comp_XIsoOfEq_hom_assoc]
+    rw [kunnethSpectralSequence_page_two_d_kunnethFirstPageXIsoTorSum_assoc]
+    simp [smul_smul, ← mul_pow]
+
+/-- A cycle of the first page of the Künneth spectral sequence at column `p`, degree `q` is sent by
+`HomologicalComplex.kunnethFirstPageXIsoTorSum` to a cycle of `kunnethTorSumComplex K L q`. -/
+@[reassoc (attr := simp)]
+lemma iCycles_kunnethFirstPageXIsoTorSum_hom_d (p q : ℕ) :
+    ((kunnethSpectralSequence K L).page 2).iCycles (-(q : ℤ) - 2 * p, p) ≫
+      (kunnethFirstPageXIsoTorSum K L p q).hom ≫ (kunnethTorSumComplex K L q).d p (p - 1) = 0 := by
+  rw [kunnethFirstPageXIsoTorSum_hom_d, iCycles_d_assoc, zero_comp]
+
+/-- The comparison of the first page of the Künneth spectral sequence around column `p`, in
+degree `q`, with `kunnethTorSumComplex K L q` around degree `p`. Its components are, up to the
+sign `(-1)^q` on the outer terms, the identifications
+`HomologicalComplex.kunnethFirstPageXIsoTorSum`. -/
+private def kunnethSecondPageShortComplexHom (p q : ℕ) :
+    ((kunnethSpectralSequence K L).page 2).sc'
+        (-(q : ℤ) - 2 * ((p + 1 : ℕ) : ℤ), (p + 1 : ℕ)) (-(q : ℤ) - 2 * p, p)
+        (-(q : ℤ) - 2 * p + 2, (p : ℤ) - 1) ⟶
+      (kunnethTorSumComplex K L q).sc' (p + 1) p (p - 1) where
+  τ₁ := (((-1 : ℤˣ) ^ q) • kunnethFirstPageXIsoTorSum K L (p + 1) q).hom
+  τ₂ := (kunnethFirstPageXIsoTorSum K L p q).hom
+  τ₃ := kunnethSecondPageτ₃ K L q p
+  comm₁₂ := by
+    dsimp only [shortComplexFunctor'_obj_f]
+    rw [kunnethSpectralSequence_page_two_d_kunnethFirstPageXIsoTorSum]
+    simp [Units.smul_def]
+  comm₂₃ := by
+    dsimp only [shortComplexFunctor'_obj_g]
+    exact kunnethFirstPageXIsoTorSum_hom_d K L p q
+
+/-- The second component of `kunnethSecondPageShortComplexHom` is
+`HomologicalComplex.kunnethFirstPageXIsoTorSum`. -/
+private lemma kunnethSecondPageShortComplexHom_τ₂ (p q : ℕ) :
+    (kunnethSecondPageShortComplexHom K L p q).τ₂ = (kunnethFirstPageXIsoTorSum K L p q).hom :=
+  (rfl)
+
+/-- The comparison `kunnethSecondPageShortComplexHom` induces an isomorphism on homology: its first
+two components are isomorphisms and its third is a monomorphism. -/
+private instance (p q : ℕ) : ShortComplex.QuasiIso (kunnethSecondPageShortComplexHom K L p q) := by
+  have : IsIso (kunnethSecondPageShortComplexHom K L p q).τ₁ :=
+    inferInstanceAs (IsIso (((-1 : ℤˣ) ^ q) • _ : _ ≅ _).hom)
+  have : IsIso (kunnethSecondPageShortComplexHom K L p q).τ₂ :=
+    inferInstanceAs (IsIso (kunnethFirstPageXIsoTorSum K L p q).hom)
+  have : Mono (kunnethSecondPageShortComplexHom K L p q).τ₃ :=
+    inferInstanceAs (Mono (kunnethSecondPageτ₃ K L q p))
+  exact ShortComplex.quasiIso_of_epi_of_isIso_of_mono _
+
+/-- **The second page of the Künneth spectral sequence.** The object at column `p`, degree `q`
+of the second page (numbered `3`) of the Künneth spectral sequence is
+`⨁_{i + j = q} Torₚ(Hᵢ(K), Hⱼ(L))`. -/
+def kunnethSpectralSequenceSecondPageXIso (p q : ℕ) :
+    ((kunnethSpectralSequence K L).page 3).X (-(q : ℤ) - 2 * p, p) ≅
+      GradedObject.mapBifunctorMapObj (Tor (ModuleCat.{u} R) p) (fun x ↦ x.1 + x.2)
+        (fun i ↦ K.homology i) (fun j ↦ L.homology j) q :=
+  ((kunnethSpectralSequence K L).iso 2 3 (-(q : ℤ) - 2 * p, p)).symm ≪≫
+    ((kunnethSpectralSequence K L).page 2 le_rfl).homologyIsoSc' _ _ _
+      (HomologicalComplex₂.columnFiltrationSpectralSequence_page_two_prev p q)
+        (HomologicalComplex₂.columnFiltrationSpectralSequence_page_two_next p q) ≪≫
+    asIso (ShortComplex.homologyMap (kunnethSecondPageShortComplexHom K L p q)) ≪≫
+    ((kunnethTorSumComplex K L q).homologyIsoSc' (p + 1) p (p - 1) (by simp)
+      (ChainComplex.next_nat p)).symm ≪≫
+    kunnethTorSumComplexHomologyIso K L q p
+
+/-- **The second-page isomorphism on classes of cycles.** The class on the second page of a cycle
+`z` of the first page at column `p`, degree `q`, is sent by
+`HomologicalComplex.kunnethSpectralSequenceSecondPageXIso` to the image under
+`HomologicalComplex.kunnethTorSumComplexHomologyIso` of the class of the cycle
+`(kunnethFirstPageXIsoTorSum K L p q).hom z` of `kunnethTorSumComplex K L q`. -/
+@[reassoc (attr := simp)]
+lemma homologyπ_kunnethSpectralSequenceSecondPageXIso_hom (p q : ℕ) :
+    ((kunnethSpectralSequence K L).page 2).homologyπ (-(q : ℤ) - 2 * p, p) ≫
+        ((kunnethSpectralSequence K L).iso 2 3 (-(q : ℤ) - 2 * p, p)).hom ≫
+        (kunnethSpectralSequenceSecondPageXIso K L p q).hom =
+      (kunnethTorSumComplex K L q).liftCycles
+          (((kunnethSpectralSequence K L).page 2).iCycles (-(q : ℤ) - 2 * p, p) ≫
+            (kunnethFirstPageXIsoTorSum K L p q).hom) (p - 1) (ChainComplex.next_nat p)
+          (by rw [Category.assoc, iCycles_kunnethFirstPageXIsoTorSum_hom_d]) ≫
+        (kunnethTorSumComplex K L q).homologyπ p ≫
+          (kunnethTorSumComplexHomologyIso K L q p).hom := by
+  have h : (((kunnethSpectralSequence K L).page 2).cyclesIsoSc' _ _ _
+        (HomologicalComplex₂.columnFiltrationSpectralSequence_page_two_prev p q)
+        (HomologicalComplex₂.columnFiltrationSpectralSequence_page_two_next p q)).hom ≫
+      ShortComplex.cyclesMap (kunnethSecondPageShortComplexHom K L p q) ≫
+      ((kunnethTorSumComplex K L q).cyclesIsoSc' (p + 1) p (p - 1) (by simp)
+        (ChainComplex.next_nat p)).inv =
+      (kunnethTorSumComplex K L q).liftCycles
+        (((kunnethSpectralSequence K L).page 2).iCycles (-(q : ℤ) - 2 * p, p) ≫
+          (kunnethFirstPageXIsoTorSum K L p q).hom) (p - 1) (ChainComplex.next_nat p)
+        (by rw [Category.assoc, iCycles_kunnethFirstPageXIsoTorSum_hom_d]) := by
+    rw [← cancel_mono ((kunnethTorSumComplex K L q).iCycles p)]
+    simp [kunnethSecondPageShortComplexHom_τ₂]
+  simp only [kunnethSpectralSequenceSecondPageXIso, Iso.trans_hom, Iso.symm_hom, asIso_hom]
+  rw [Iso.hom_inv_id_assoc]
+  simp only [π_homologyIsoSc'_hom_assoc, ShortComplex.homologyπ_naturality_assoc,
+    π_homologyIsoSc'_inv_assoc, reassoc_of% h]
+
+end HomologicalComplex
