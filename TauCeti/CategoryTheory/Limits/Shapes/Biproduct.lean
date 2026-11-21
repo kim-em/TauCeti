@@ -57,10 +57,6 @@ through `biprod.opIso` has inverse given by the images of the projections
 (`CategoryTheory.Functor.mapIso_biprod_opIso_trans_mapBiprod_inv`), and it identifies the lift of
 the images of two maps `f`, `g` with the image of `biprod.desc f g`
 (`CategoryTheory.Functor.biprod_lift_map_op_comp_mapIso_biprod_opIso_trans_mapBiprod_inv`).
-For a functor preserving an indexed biproduct, the comparison `F.mapBiproduct f` matches the images
-of the inclusions with the inclusions of the images
-(`CategoryTheory.Functor.map_biproduct_ι_mapBiproduct_hom`,
-`CategoryTheory.Functor.biproduct_ι_mapBiproduct_inv`).
 -/
 
 public section
@@ -687,28 +683,6 @@ theorem biprod_lift_map_op_comp_mapIso_biprod_opIso_trans_mapBiprod_inv {Z : C} 
       ← op_comp, biprod.inl_desc, biprod.inr_desc]
 
 end Op
-
-section MapBiproduct
-
-variable {C : Type u} {D : Type v} [Category.{w} C] [Category.{w'} D] [HasZeroMorphisms C]
-  [HasZeroMorphisms D] (F : C ⥤ D) [F.PreservesZeroMorphisms] {J : Type*} (f : J → C)
-  [HasBiproduct f] [PreservesBiproduct f F] (j : J)
-
-/-- The comparison `F.mapBiproduct f` sends the image of the inclusion of a summand to the
-inclusion of the image summand. -/
-@[reassoc]
-theorem map_biproduct_ι_mapBiproduct_hom :
-    F.map (biproduct.ι f j) ≫ (F.mapBiproduct f).hom = biproduct.ι (F.obj ∘ f) j := by
-  rw [← Iso.eq_comp_inv, mapBiproduct_inv, biproduct.ι_desc]
-
-/-- The inverse of the comparison `F.mapBiproduct f` sends the inclusion of an image summand to
-the image of the inclusion of the summand. -/
-@[reassoc]
-theorem biproduct_ι_mapBiproduct_inv :
-    biproduct.ι (F.obj ∘ f) j ≫ (F.mapBiproduct f).inv = F.map (biproduct.ι f j) := by
-  rw [mapBiproduct_inv, biproduct.ι_desc]
-
-end MapBiproduct
 
 end CategoryTheory.Functor
 

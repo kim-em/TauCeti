@@ -39,19 +39,16 @@ variable {I J C : Type*} [Category* C] [HasZeroMorphisms C] (X : GradedObject I 
   [X.HasMap p] (j : J) [HasBiproduct (X.mapObjFun p j)]
 
 /-- The coproduct `X.mapObj p j` of the `X i` with `p i = j` is the biproduct of these objects. -/
-def mapObjIsoBiproduct : X.mapObj p j ≅ ⨁ X.mapObjFun p j where
-  hom := X.descMapObj p fun i h ↦ biproduct.ι (X.mapObjFun p j) ⟨i, Set.mem_singleton_iff.2 h⟩
-  inv := biproduct.desc fun i ↦ X.ιMapObj p i j (Set.mem_singleton_iff.1 i.property)
-  hom_inv_id := X.mapObj_ext p _ _ fun i h ↦ by simp
-  inv_hom_id := biproduct.hom_ext' _ _ fun i ↦ by
-    rw [biproduct.ι_desc_assoc, X.ι_descMapObj, Category.comp_id]
+def mapObjIsoBiproduct : X.mapObj p j ≅ ⨁ X.mapObjFun p j :=
+  (CofanMapObjFun.iso (biproduct.isColimit (X.mapObjFun p j))).symm
 
 /-- `mapObjIsoBiproduct` sends the summand `X i` to the corresponding summand of the biproduct. -/
 @[reassoc (attr := simp)]
 lemma ιMapObj_mapObjIsoBiproduct_hom (i : I) (h : p i = j) :
     X.ιMapObj p i j h ≫ (X.mapObjIsoBiproduct p j).hom =
       biproduct.ι (X.mapObjFun p j) ⟨i, Set.mem_singleton_iff.2 h⟩ := by
-  simp [mapObjIsoBiproduct]
+  rw [mapObjIsoBiproduct, Iso.symm_hom, CofanMapObjFun.ιMapObj_iso_inv]
+  simp
 
 /-- The inverse of `mapObjIsoBiproduct` sends each summand of the biproduct to the corresponding
 summand of `X.mapObj p j`. -/
@@ -59,7 +56,9 @@ summand of `X.mapObj p j`. -/
 lemma ι_mapObjIsoBiproduct_inv (i : p ⁻¹' {j}) :
     biproduct.ι (X.mapObjFun p j) i ≫ (X.mapObjIsoBiproduct p j).inv =
       X.ιMapObj p i j (Set.mem_singleton_iff.1 i.property) := by
-  simp [mapObjIsoBiproduct]
+  rw [mapObjIsoBiproduct, Iso.symm_inv]
+  simpa using CofanMapObjFun.inj_iso_hom (biproduct.isColimit (X.mapObjFun p j)) i.val
+    (Set.mem_singleton_iff.1 i.property)
 
 end MapObj
 

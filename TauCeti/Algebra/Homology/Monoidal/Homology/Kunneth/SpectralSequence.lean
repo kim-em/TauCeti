@@ -140,6 +140,9 @@ spectral sequence in degree `q`, up to the sign `(-1)^q` of its differential. -/
 def kunnethTorSumComplex (q : ℕ) : ChainComplex (ModuleCat.{u} R) ℕ :=
   ⨁ fun x : Finset.antidiagonal q ↦ kunnethTorComplex K L x.val.1 x.val.2
 
+-- Composites of isomorphisms through `⨁` and through `kunnethTorSumComplex K L q` are type
+-- correct only after unfolding `kunnethTorSumComplex`, which `simp` does not do, so this identity
+-- comparison keeps them rewritable.
 /-- `kunnethTorSumComplex K L q` is the biproduct of the complexes `kunnethTorComplex K L i j`. -/
 private def kunnethTorSumComplexIsoBiproduct (q : ℕ) :
     kunnethTorSumComplex K L q ≅
@@ -161,19 +164,13 @@ private lemma kunnethTorSumComplexι_eq (q i j : ℕ) (h : i + j = q) :
         ⟨(i, j), Finset.mem_antidiagonal.2 h⟩ ≫ (kunnethTorSumComplexIsoBiproduct K L q).inv :=
   (rfl)
 
-/-- The identification of the terms of `kunnethTorComplex K L i j`, by definition. -/
-private def kunnethTorComplexXIsoAux (i j p : ℕ) :
-    (kunnethTorComplex K L i j).X p ≅
-      K.homology i ⊗ ((cartanEilenbergResolution L).X p).homology j :=
-  -- the term of `homologyResolution L j` in degree `p` is `Hⱼ(Q.X p)` by definition
-  Iso.refl _
-
 -- `kunnethTorComplex` is not exposed, so its terms are only available through this isomorphism.
 /-- In degree `p`, the complex `kunnethTorComplex K L i j` is `Hᵢ(K) ⊗ Hⱼ(Q.X p)`. -/
 def kunnethTorComplexXIso (i j p : ℕ) :
     (kunnethTorComplex K L i j).X p ≅
       K.homology i ⊗ ((cartanEilenbergResolution L).X p).homology j :=
-  kunnethTorComplexXIsoAux K L i j p
+  -- the term of `homologyResolution L j` in degree `p` is `Hⱼ(Q.X p)` by definition
+  Iso.refl _
 
 /-- The differential of `kunnethTorComplex K L i j` is `Hᵢ(K)` tensored with the map induced on
 `Hⱼ` by the differential of the Cartan–Eilenberg resolution. -/
@@ -210,7 +207,7 @@ lemma ιTensorObj_tensorObjIsoKunnethTorSumComplexX_hom (q p i j : ℕ) (h : i +
     (kunnethTorComplexXIso K L i j p).inv ≫ (kunnethTorSumComplexι K L q i j h).f p := by
   simp only [tensorObjIsoKunnethTorSumComplexX, Iso.trans_hom, Iso.symm_hom, biproduct.mapIso_hom,
     GradedObject.Monoidal.ι_tensorObjIsoBiproduct_hom_assoc, biproduct.ι_map_assoc,
-    Functor.biproduct_ι_mapBiproduct_inv_assoc, Functor.mapIso_hom, kunnethTorSumComplexι_eq,
+    Functor.mapBiproduct_inv, biproduct.ι_desc_assoc, Functor.mapIso_hom, kunnethTorSumComplexι_eq,
     comp_f, eval_map]
 
 /-- Under the identifications `HomologicalComplex.tensorObjIsoKunnethTorSumComplexX`, the
@@ -232,21 +229,14 @@ lemma tensorObjIsoKunnethTorSumComplexX_hom_d (q p : ℕ) :
 -- `kunnethTorComplex` is not exposed, and `Tor` is the left derived functor of the tensor product
 -- only by unfolding `CategoryTheory.Tor`, so `ProjectiveResolution.isoLeftDerivedObj` does not
 -- have this type syntactically.
-/-- The computation of `Tor` by the resolution `homologyResolution L j`, as an isomorphism with
-source the homology of `kunnethTorComplex K L i j`. -/
-private def kunnethTorComplexHomologyIsoAux (i j p : ℕ) :
-    (HomologicalComplex.homologyFunctor _ _ p).obj (kunnethTorComplex K L i j) ≅
-      ((Tor (ModuleCat.{u} R) p).obj (K.homology i)).obj (L.homology j) :=
-  -- `Tor` is by definition the left derived functor of the tensor product in the second variable
-  ((homologyResolution L j).isoLeftDerivedObj ((tensoringLeft _).obj (K.homology i)) p).symm
-
 /-- The homology of `kunnethTorComplex K L i j` in degree `p` is `Torₚ(Hᵢ(K), Hⱼ(L))`, computed by
 the projective resolution `ChainComplex.cartanEilenbergResolution.homologyResolution L j`: it is
 the inverse of `ProjectiveResolution.isoLeftDerivedObj` for that resolution. -/
 def kunnethTorComplexHomologyIso (i j p : ℕ) :
     (HomologicalComplex.homologyFunctor _ _ p).obj (kunnethTorComplex K L i j) ≅
       ((Tor (ModuleCat.{u} R) p).obj (K.homology i)).obj (L.homology j) :=
-  kunnethTorComplexHomologyIsoAux K L i j p
+  -- `Tor` is by definition the left derived functor of the tensor product in the second variable
+  ((homologyResolution L j).isoLeftDerivedObj ((tensoringLeft _).obj (K.homology i)) p).symm
 
 /-- The homology of `kunnethTorSumComplex K L q` in degree `p` is
 `⨁_{i + j = q} Torₚ(Hᵢ(K), Hⱼ(L))`. -/
@@ -271,11 +261,15 @@ lemma homologyMap_kunnethTorSumComplexι_kunnethTorSumComplexHomologyIso_hom (q 
     (kunnethTorComplexHomologyIso K L i j p).hom ≫
       GradedObject.ιMapBifunctorMapObj (Tor (ModuleCat.{u} R) p) (fun x ↦ x.1 + x.2)
         (fun i ↦ K.homology i) (fun j ↦ L.homology j) i j q h := by
+  -- `(F.mapBiproduct f).inv` is by definition the comparison `biproductComparison' F f`
+  have hι := (Iso.eq_comp_inv ((HomologicalComplex.homologyFunctor _ _ p).mapBiproduct
+    fun x : Finset.antidiagonal q ↦ kunnethTorComplex K L x.val.1 x.val.2)).1
+    (Functor.ι_biproductComparison' _ _ ⟨(i, j), Finset.mem_antidiagonal.2 h⟩).symm
   rw [kunnethTorSumComplexι_eq, homologyMap_comp]
   simp only [kunnethTorSumComplexHomologyIso, Iso.trans_hom, Iso.symm_hom, biproduct.mapIso_hom,
     Functor.mapIso_hom, homologyFunctor_map, Category.assoc, ← homologyMap_comp_assoc,
     Iso.inv_hom_id, homologyMap_id, Category.id_comp]
-  rw [← homologyFunctor_map, Functor.map_biproduct_ι_mapBiproduct_hom_assoc, biproduct.ι_map_assoc,
+  rw [← homologyFunctor_map, reassoc_of% hι, biproduct.ι_map_assoc,
     GradedObject.ι_mapBifunctorMapObjIsoBiproduct_inv (fun i ↦ K.homology i)
       (fun j ↦ L.homology j) (Tor (ModuleCat.{u} R) p)]
 
