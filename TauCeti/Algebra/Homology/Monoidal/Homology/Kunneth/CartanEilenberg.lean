@@ -11,6 +11,7 @@ public import Mathlib.RingTheory.Flat.CategoryTheory
 public import TauCeti.Algebra.Category.ModuleCat.AB
 public import TauCeti.Algebra.Homology.CartanEilenbergResolution
 public import TauCeti.Algebra.Homology.Monoidal.Homology.Connecting
+public import TauCeti.Algebra.Homology.Monoidal.Homology.Kunneth.Projective
 public import TauCeti.Algebra.Homology.TotalComplex.Basic
 
 /-!
@@ -35,9 +36,15 @@ rows make the augmentation of the total complex a quasi-isomorphism
 
 This bicomplex is the source of the Künneth spectral sequence. When every term of `K` is flat, the
 spectral sequence of its column filtration therefore converges to the homology of `K ⊗ L`. Since
-the complexes `Q.X p` have projective terms and projective homology, the Künneth formula for the
-columns `K ⊗ Q.X p` identifies the page after the first (E² in Weibel's numbering, `page 3` in the
-numbering of `HomologicalComplex₂.columnFiltrationSpectralSequence`) with `Tor`; see
+the complexes `Q.X p` have projective terms and projective homology, the Künneth map
+`⨁_{i + j = k} Hᵢ(K) ⊗ Hⱼ(Q.X p) ⟶ H_k(K ⊗ Q.X p)` of each column is an isomorphism
+(`HomologicalComplex.kunnethColumnHomologyKunneth`), natural in the horizontal differentials
+(`HomologicalComplex.kunnethColumnHomologyKunneth_naturality`). This identifies the first page of
+the spectral sequence (E¹, `page 2` in the numbering of
+`HomologicalComplex₂.columnFiltrationSpectralSequence`). The page after it (E², `page 3`) is then
+`Tor`: the first differential is induced by the maps `Hⱼ(Q.d (p + 1) p)`, and for each `j` the
+complex `p ↦ Hⱼ(Q.X p)` is a projective resolution of `Hⱼ(L)`
+(`ChainComplex.cartanEilenbergResolution.homologyResolution`); see
 `TauCeti.Algebra.Homology.Monoidal.Homology.Kunneth.SpectralSequence`.
 
 ## References
@@ -92,6 +99,45 @@ lemma kunnethBicomplex_X (p : ℕ) :
 /-- The horizontal differential of the Künneth bicomplex is `K` whiskered with that of `Q`. -/
 lemma kunnethBicomplex_d (p p' : ℕ) :
     (kunnethBicomplex K L).d p p' = K ◁ (cartanEilenbergResolution L).d p p' := (rfl)
+
+-- The target is stated as the homology of the column of the bicomplex rather than of
+-- `K ⊗ Q.X p`, which it is only by unfolding `kunnethBicomplex`, so that composites with
+-- isomorphisms about the bicomplex are type correct without unfolding.
+/-- The Künneth map of `K` and the row `p` of the Cartan–Eilenberg resolution `Q` of `L`, with
+target the homology of the column `p` of the Künneth bicomplex, which is `K ⊗ Q.X p`. -/
+def kunnethColumnHomologyKunneth (p k : ℕ) :
+    GradedObject.Monoidal.tensorObj (fun i ↦ K.homology i)
+        (fun j ↦ ((cartanEilenbergResolution L).X p).homology j) k ⟶
+      ((kunnethBicomplex K L).X p).homology k :=
+  homologyKunneth K ((cartanEilenbergResolution L).X p) k
+
+/-- `kunnethColumnHomologyKunneth K L p k` is the Künneth map of `K` and `Q.X p`. -/
+lemma kunnethColumnHomologyKunneth_eq (p k : ℕ) :
+    kunnethColumnHomologyKunneth K L p k =
+      homologyKunneth K ((cartanEilenbergResolution L).X p) k :=
+  (rfl)
+
+/-- The Künneth map `kunnethColumnHomologyKunneth` is an isomorphism, because the rows of the
+Cartan–Eilenberg resolution have projective terms and projective homology. -/
+instance isIso_kunnethColumnHomologyKunneth (p k : ℕ) :
+    IsIso (kunnethColumnHomologyKunneth K L p k) :=
+  isIso_homologyKunneth_of_projective_right _ _ k
+
+/-- Naturality of `kunnethColumnHomologyKunneth` with respect to the horizontal differentials of
+the Künneth bicomplex. -/
+@[reassoc]
+lemma kunnethColumnHomologyKunneth_naturality (p k : ℕ) :
+    kunnethColumnHomologyKunneth K L (p + 1) k ≫
+        homologyMap ((kunnethBicomplex K L).d (p + 1) p) k =
+      GradedObject.Monoidal.whiskerLeft (fun i ↦ K.homology i)
+        (fun j ↦ homologyMap ((cartanEilenbergResolution L).d (p + 1) p) j) k ≫
+        kunnethColumnHomologyKunneth K L p k := by
+  have h := homologyKunneth_naturality (𝟙 K) ((cartanEilenbergResolution L).d (p + 1) p) k
+  simp only [homologyMap_id] at h
+  -- `𝟙` of a graded object is the family of identities, `K ◁ f` is `tensorHom (𝟙 K) f`, and the
+  -- columns and horizontal differentials of the Künneth bicomplex are `K ⊗ Q.X p` and `K ◁ Q.d`,
+  -- all by definition
+  exact h.symm
 
 /-- The augmentation of the column `0` of the Künneth bicomplex to `K ⊗ L`. -/
 def kunnethBicomplexε : (kunnethBicomplex K L).X 0 ⟶ K ⊗ L :=
