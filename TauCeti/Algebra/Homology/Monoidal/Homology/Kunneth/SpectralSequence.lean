@@ -199,6 +199,10 @@ def kunnethTorComplexXIso (i j p : ℕ) :
   -- the term of `homologyResolution L j` in degree `p` is `Hⱼ(Q.X p)` by definition
   Iso.refl _
 
+/-- The identification `HomologicalComplex.kunnethTorComplexXIso` is the identity. -/
+lemma kunnethTorComplexXIso_eq (i j p : ℕ) : kunnethTorComplexXIso K L i j p = Iso.refl _ :=
+  (rfl)
+
 /-- The differential of `kunnethTorComplex K L i j` is `Hᵢ(K)` tensored with the map induced on
 `Hⱼ` by the differential of the Cartan–Eilenberg resolution. -/
 @[reassoc]

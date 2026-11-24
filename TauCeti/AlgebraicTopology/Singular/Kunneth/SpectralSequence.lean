@@ -83,8 +83,9 @@ On the second page, identified with `⨁_{i + j = q} Torₚ(Hᵢ(X; R), Hⱼ(Y; 
 the maps induced on `Tor` by `g_*` and by `k_*`
 (`TopCat.singularKunnethSpectralSequenceSecondPageXIso_hom_naturality_left`,
 `TopCat.singularKunnethSpectralSequenceSecondPageXIso_hom_naturality_right`); in particular, from
-the second page on the morphism in `Y` does not depend on the choice of the lift. The edge maps
-and the collapse corollaries are not treated here.
+the second page on the morphism in `Y` does not depend on the choice of the lift. The edge maps,
+their identification with the Künneth map and the collapse corollaries are in
+`TauCeti.AlgebraicTopology.Singular.Kunneth.Edge`.
 
 ## Indexing
 
