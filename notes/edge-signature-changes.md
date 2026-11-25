@@ -22,3 +22,7 @@ E2 review round d2eb643331 (on roadmap/bicomplex-edge, PR #45740):
 
 E2 generality round ffdcfa8ca3:
 - isIso_rowFiltrationSpectralSequencePageXToEInfty_of_isZero now (r s : ℤ) (hr : s + 1 ≤ r) (pq) (n) (hn) (hpq₀ : 0 ≤ pq.2) (hpq₁ : pq.2 < s) (h : ∀ pq, s ≤ pq.2 → IsZero (page r).X pq).
+
+E2 third round 4cc49824b2:
+- Renamed columnFiltrationSpectralSequenceFirstPageXIso_inv_columnFiltrationEdge -> ..._totalAugmentation.
+- New isIso_rowFiltration_abutmentFiltrationι_rowTwo, isIso_rowFiltrationSpectralSequencePageXToEInfty_rowOne, rowFiltrationToRowOne_eq (@[reassoc]).
