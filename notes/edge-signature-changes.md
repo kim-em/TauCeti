@@ -19,3 +19,6 @@ E2 review round d2eb643331 (on roadmap/bicomplex-edge, PR #45740):
 - Removed isZero_rowFiltrationEdge_abutmentFiltration, isZero_rowFiltrationEdge_H: inline `K.isZero_rowFiltration_abutmentFiltration _ (by subst hpq; simp) _` and `K.isZero_rowFiltrationSpectralObject_H_bot _ _ (by subst hpq; dsimp; omega)`.
 - totalRowι_zero (@[simp], rfl) and isZero_rowFiltrationSpectralObject_H_bot moved to Bicomplex/Basic.
 - New rowFiltrationToRowOne_comp_spectralSequencePageXToEInfty, columnFiltrationToColumnOne_def.
+
+E2 generality round ffdcfa8ca3:
+- isIso_rowFiltrationSpectralSequencePageXToEInfty_of_isZero now (r s : ℤ) (hr : s + 1 ≤ r) (pq) (n) (hn) (hpq₀ : 0 ≤ pq.2) (hpq₁ : pq.2 < s) (h : ∀ pq, s ≤ pq.2 → IsZero (page r).X pq).
