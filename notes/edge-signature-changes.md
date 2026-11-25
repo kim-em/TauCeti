@@ -12,3 +12,10 @@ E1 second review round f91e6b9b41 (on roadmap/spectral-object-edge):
 - isZero_Tor_add_two_of_hasProjectiveDimensionLE_one moved to Tor/Basic.
 - New EInftyToAbutment_eq, Epi instance and characterising lemma for abutmentToEInfty.
 Plan: when E1 merges, rebuild the E2/E3 branches from origin/main + Bicomplex/Edge, Kunneth/Edge, Singular/Edge files of this branch, applying the above.
+
+E2 review round d2eb643331 (on roadmap/bicomplex-edge, PR #45740):
+- All bicomplex collapse decls take (r : ℤ) (hr) right after K: 3 ≤ r for isIso_rowFiltrationSpectralSequencePageXToEInfty_of_isZero, rowFiltrationToRowOne, columnFiltrationToColumnOne, rowFiltrationEdge_rowFiltrationToRowOne, columnFiltrationEdge_columnFiltrationToColumnOne, rowFiltrationEdge_shortExact, columnFiltrationEdge_shortExact; 2 ≤ r for isZero_rowFiltrationSpectralObject_EInfty, isIso_rowFiltration_abutmentFiltrationι_of_isZero, isIso_rowFiltrationEdge_of_isZero, isIso_columnFiltrationEdge_of_isZero. At r = 3 pass `3 (by norm_num)`.
+- isIso_*FiltrationEdge_of_isZero conclusion: rowFiltrationEdge r hr (was rowFiltrationEdge 3 _).
+- Removed isZero_rowFiltrationEdge_abutmentFiltration, isZero_rowFiltrationEdge_H: inline `K.isZero_rowFiltration_abutmentFiltration _ (by subst hpq; simp) _` and `K.isZero_rowFiltrationSpectralObject_H_bot _ _ (by subst hpq; dsimp; omega)`.
+- totalRowι_zero (@[simp], rfl) and isZero_rowFiltrationSpectralObject_H_bot moved to Bicomplex/Basic.
+- New rowFiltrationToRowOne_comp_spectralSequencePageXToEInfty, columnFiltrationToColumnOne_def.
